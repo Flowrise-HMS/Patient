@@ -1,0 +1,23 @@
+{
+    "name": "Patient",
+    "alias": "patient",
+    "description": "Comprehensive patient management with registration, unique identification (MRN & UUID), demographics, emergency contacts, and PII encryption. Supports multiple identifier types including NHIS for Ghana healthcare integration.",
+    "keywords": [
+        "patient",
+        "patient-management",
+        "hospital",
+        "healthcare",
+        "mrn",
+        "demographics",
+        "emergency-contacts",
+        "health-information"
+    ],
+    "priority": 2,
+    "providers": [
+        "Modules\\Patient\\Providers\\PatientServiceProvider"
+    ],
+    "files": [],
+    "requires": [
+        "flowrise-hms/core"
+    ]
+}
