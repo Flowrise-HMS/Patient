@@ -194,18 +194,19 @@ class PatientsTable
                     ->label('Activate Selected')
                     ->icon('heroicon-o-user-plus')
                     ->color('success')
+                    ->accessSelectedRecords()
                     ->action(function ($records) {
-                        $records->each(fn ($record) => $record->update(['is_active' => true]));
+                        $records?->each(fn ($record) => $record?->update(['is_active' => true]));
                     }),
                 Action::make('deactivate_selected')
                     ->label('Deactivate Selected')
                     ->icon('heroicon-o-user-minus')
                     ->color('warning')
+                    ->accessSelectedRecords()
                     ->action(function ($records) {
-                        $records->each(fn ($record) => $record->update(['is_active' => false]));
+                        $records?->each(fn ($record) => $record->update(['is_active' => false]));
                     }),
-            ])
-                ->label('Bulk Actions'),
+            ])->label('Bulk Actions'),
         ];
     }
     public static function getGroupings(): array
