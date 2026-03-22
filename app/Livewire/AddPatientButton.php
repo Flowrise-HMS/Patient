@@ -50,7 +50,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                     'date_of_birth' => $data['date_of_birth'],
                     'gender' => $data['gender'],
                     'phone' => $data['phone'] ?? null,
-                    'branch_id' => Auth::user()->branch_id,
+                    'branch_id' => Auth::user()?->branch_id,
                 ]);
 
                 if ($patient) {
