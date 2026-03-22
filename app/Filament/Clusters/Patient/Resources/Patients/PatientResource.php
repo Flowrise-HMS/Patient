@@ -8,8 +8,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Core\Enums\NavigationGroup;
+use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\CreatePatient;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\EditPatient;
@@ -30,6 +32,22 @@ class PatientResource extends Resource
     protected static ?string $cluster = PatientCluster::class;
 
     protected static ?string $recordTitleAttribute = 'mrn';
+
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return app(PatientSearchService::class)->getSearchableFields();
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Name' => $record->full_name,
+            'MRN' => $record->mrn,
+            'Phone' => $record->phone,
+            'Email' => $record->email,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

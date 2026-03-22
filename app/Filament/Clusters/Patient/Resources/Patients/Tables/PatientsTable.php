@@ -32,7 +32,6 @@ class PatientsTable
              ->filters(static::getFilters(), layout: \Filament\Tables\Enums\FiltersLayout::Dropdown)
             ->filtersFormColumns(3)
             ->groups(static::getGroupings())
-            ->defaultGroup('created_at')
             ->defaultSort('created_at', 'desc')
             ->paginated([10, 25, 50, 100])
             ->recordActions(static::getActions())
