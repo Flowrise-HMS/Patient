@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Classes\Services;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Patient\Models\Patient;
@@ -224,9 +224,11 @@ class PatientSchoolService
 
             foreach ($schools as $data) {
                 if (! empty($data['school_name'])) {
-                    if ($first && ! isset($data['is_current'])) {
-                        $data['is_current'] = true;
+                    if ($first) {
+                        $data['is_current'] = $data['is_current'] ?? true;
                         $first = false;
+                    } else {
+                        $data['is_current'] = $data['is_current'] ?? false;
                     }
 
                     $created->push($this->create($patient, $data));
@@ -270,7 +272,7 @@ class PatientSchoolService
             ->update(['is_current' => false]);
     }
 
-    protected function promoteNextCurrent(int $patientId): void
+    protected function promoteNextCurrent(string $patientId): void
     {
         $next = PatientSchool::where('patient_id', $patientId)
             ->where('is_active', true)

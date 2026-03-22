@@ -50,7 +50,7 @@ class PatientIdentifierService
     {
         return DB::transaction(function () use ($patient, $data) {
             if (($data['is_primary'] ?? false)) {
-                $this->clearPrimaryFlag($patient, $data['type'] ?? null);
+                $this->clearPrimaryFlag($patient);
             }
 
             $data['patient_id'] = $patient->id;
@@ -198,7 +198,7 @@ class PatientIdentifierService
             ->get();
     }
 
-    public function bulkCreate(Patient $patient, array $identifiers): Collection
+    public function bulkCreate(Patient $patient, array $identifiers): \Illuminate\Support\Collection
     {
         return DB::transaction(function () use ($patient, $identifiers) {
             $created = collect();

@@ -3,12 +3,14 @@
 namespace Modules\Patient\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Patient\Database\Factories\PatientSchoolFactory;
 
 class PatientSchool extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'patient_id',
@@ -99,5 +101,10 @@ class PatientSchool extends Model
         }
 
         return implode(' | ', $parts);
+    }
+
+    protected static function newFactory(): PatientSchoolFactory
+    {
+        return PatientSchoolFactory::new();
     }
 }

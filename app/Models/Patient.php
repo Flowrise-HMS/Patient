@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,7 +27,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia
 {
-    use HasAddress, HasContact, HasUuids, InteractsWithMedia, SoftDeletes;
+    use HasAddress, HasContact, HasFactory, HasUuids, InteractsWithMedia, SoftDeletes;
 
     protected $keyType = 'string';
 

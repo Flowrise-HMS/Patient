@@ -132,8 +132,8 @@ class PatientSearchService
                     $query->where('first_name', 'LIKE', "%{$parts[0]}%")
                         ->where('last_name', 'LIKE', "%{$parts[1]}%");
                 } else {
-                    $query->where('first_name', 'LIKE', "%{$name}%")
-                        ->orWhere('last_name', 'LIKE', "%{$name}%");
+                    $query->where('first_name', 'LIKE', "%{$parts[0]}%")
+                        ->orWhere('last_name', 'LIKE', "%{$parts[0]}%");
                 }
             })
             ->orderByDesc('created_at')
@@ -162,12 +162,12 @@ class PatientSearchService
         });
     }
 
-    protected function normalizeTerm(string $term): string
+    public function normalizeTerm(string $term): string
     {
-        return trim(preg_replace('/\s+/', ' ', $term));
+        return strtolower(trim(preg_replace('/\s+/', ' ', $term)));
     }
 
-    protected function normalizePhone(string $phone): string
+    public function normalizePhone(string $phone): string
     {
         return preg_replace('/\D/', '', $phone);
     }

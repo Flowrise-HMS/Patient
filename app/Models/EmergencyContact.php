@@ -5,9 +5,7 @@ namespace Modules\Patient\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Core\Traits\HasAddress;
 use Modules\Patient\Database\Factories\EmergencyContactFactory;
-use Spatie\MediaLibrary\MediaCollections\Models\Concerns\HasUuid;
 
 class EmergencyContact extends Model
 {
@@ -28,6 +26,9 @@ class EmergencyContact extends Model
         'alternate_phone' => 'encrypted',
         'email' => 'encrypted',
         'address' => 'encrypted',
+        'is_primary' => 'boolean',
+        'can_receive_sms' => 'boolean',
+        'can_make_medical_decisions' => 'boolean',
     ];
 
     protected static function newFactory(): EmergencyContactFactory

@@ -177,7 +177,7 @@ class EmergencyContactService
             ->get();
     }
 
-    public function bulkCreate(Patient $patient, array $contacts): Collection
+    public function bulkCreate(Patient $patient, array $contacts): \Illuminate\Support\Collection
     {
         return DB::transaction(function () use ($patient, $contacts) {
             $created = collect();
@@ -185,9 +185,11 @@ class EmergencyContactService
             $first = true;
             foreach ($contacts as $data) {
                 if (! empty($data['name']) && ! empty($data['phone'])) {
-                    if ($first && ! isset($data['is_primary'])) {
-                        $data['is_primary'] = true;
+                    if ($first) {
+                        $data['is_primary'] = $data['is_primary'] ?? true;
                         $first = false;
+                    } else {
+                        $data['is_primary'] = $data['is_primary'] ?? false;
                     }
 
                     $created->push($this->create($patient, $data));
@@ -239,7 +241,7 @@ class EmergencyContactService
             ->update(['is_primary' => false]);
     }
 
-    protected function promoteNextPrimary(int $patientId): void
+    protected function promoteNextPrimary(string $patientId): void
     {
         $next = EmergencyContact::where('patient_id', $patientId)
             ->orderBy('created_at')
