@@ -4,7 +4,7 @@
     "description": "Patient management module for FlowRise HMS providing comprehensive patient registration, identification, demographics management, and emergency contact handling. Implements MRN auto-generation, UUID-based identifiers for interoperability, and PII encryption for data protection.",
     "authors": [
         {
-            "name": "Flowrisedigital",
+            "name": "Flowrise Digital",
             "homepage": "https://github.com/Flowrise-HMS",
             "email": "flowrisedigitals@gmail.com"
         },
@@ -12,7 +12,7 @@
             "name": "Mushe Abdul-Hakim",
             "email": "musheabdulhakim99@gmail.com",
             "homepage": "https://github.com/musheabdulhakim",
-            "role": "developer"
+            "role": "Lead Developer"
         }
     ],
     "license": "MIT",
@@ -24,8 +24,7 @@
     },
     "require": {
         "php": "^8.4",
-        "flowrise-hms/core": "dev-main",
-        "laravel/framework": "^12.0"
+        "flowrise-hms/core": "dev-main"
     },
     "autoload": {
         "psr-4": {

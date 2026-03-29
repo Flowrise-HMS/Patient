@@ -4,7 +4,6 @@ namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Tables;
 
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -12,9 +11,9 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -29,7 +28,7 @@ class PatientsTable
         return $table
             ->columns(static::getColumns())
             ->filters(static::getFilters())
-             ->filters(static::getFilters(), layout: \Filament\Tables\Enums\FiltersLayout::Dropdown)
+            ->filters(static::getFilters(), layout: FiltersLayout::Dropdown)
             ->filtersFormColumns(3)
             ->groups(static::getGroupings())
             ->defaultSort('created_at', 'desc')
@@ -39,8 +38,7 @@ class PatientsTable
             ->persistFiltersInSession();
     }
 
-
-     public static function getColumns(): array
+    public static function getColumns(): array
     {
         return [
             TextColumn::make('#')->rowIndex(),
@@ -95,6 +93,7 @@ class PatientsTable
                 ->toggleable(isToggledHiddenByDefault: false),
         ];
     }
+
     public static function getFilters(): array
     {
         return [
@@ -143,10 +142,12 @@ class PatientsTable
                         return $query;
                     }
                     [$year, $month] = explode('-', $data['value']);
+
                     return $query->whereYear('created_at', $year)->whereMonth('created_at', $month);
                 }),
         ];
     }
+
     public static function getActions(): array
     {
         return [
@@ -177,6 +178,7 @@ class PatientsTable
                 ->button(),
         ];
     }
+
     public static function getBulkActions(): array
     {
         return [
@@ -188,7 +190,7 @@ class PatientsTable
                     ->label('Export Selected')
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($records) {
-                        //todo:: Export to CSV/Excel
+                        // todo:: Export to CSV/Excel
                     }),
                 Action::make('activate_selected')
                     ->label('Activate Selected')
@@ -209,6 +211,7 @@ class PatientsTable
             ])->label('Bulk Actions'),
         ];
     }
+
     public static function getGroupings(): array
     {
         return [
@@ -218,6 +221,7 @@ class PatientsTable
             'is_active' => 'Status',
         ];
     }
+
     protected static function getMonthOptions(): array
     {
         $options = [];
@@ -226,6 +230,7 @@ class PatientsTable
             $options[$date->format('Y-m')] = $date->format('F Y');
             $date = $date->subMonth();
         }
+
         return $options;
     }
 }

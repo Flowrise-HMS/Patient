@@ -26,7 +26,7 @@ return new class extends Migration
             $table->date('expiry_date')->nullable();
             $table->text('note')->nullable();
 
-            $table->unique(['patient_id', 'type','value']);
+            $table->unique(['patient_id', 'type', 'value']);
             $table->timestamps();
         });
     }

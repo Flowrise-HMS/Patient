@@ -4,9 +4,7 @@ namespace Modules\Patient\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Patient\Models\Patient;
@@ -18,7 +16,7 @@ class PatientDeceased
     /**
      * Create a new event instance.
      */
-    public function __construct(public Patient $patient,) {}
+    public function __construct(public Patient $patient) {}
 
     /**
      * Get the channels the event should be broadcast on.

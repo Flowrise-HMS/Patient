@@ -16,7 +16,6 @@ class PatientRegistered
         public ?int $registeredBy = null
     ) {}
 
-
     /**
      * Get the channels the event should be broadcast on.
      */

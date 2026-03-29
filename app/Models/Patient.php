@@ -23,6 +23,7 @@ use Modules\Patient\Enums\MaritalStatus;
 use Modules\Patient\Observers\PatientObserver;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia
@@ -120,5 +121,45 @@ class Patient extends BaseModel implements HasMedia
     protected static function newFactory(): PatientFactory
     {
         return PatientFactory::new();
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('photo')
+            ->singleFile()
+            ->withResponsiveImages();
+
+        $this->addMediaCollection('documents');
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(150)
+            ->height(150);
+
+        $this->addMediaConversion('avatar')
+            ->width(300)
+            ->height(300);
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('photo');
+    }
+
+    public function getPhotoAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('photo');
+    }
+
+    public function hasPhoto(): bool
+    {
+        return $this->hasMedia('photo');
+    }
+
+    public function getDocumentsAttribute()
+    {
+        return $this->getMedia('documents');
     }
 }

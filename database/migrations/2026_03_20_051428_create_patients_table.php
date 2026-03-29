@@ -31,10 +31,9 @@ return new class extends Migration
             $table->string('occupation')->nullable();
             $table->string('nationality')->nullable();
 
-            
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
-            
+
             $table->string('preferred_language')->nullable();
             $table->string('photo')->nullable();
             $table->boolean('is_active')->default(true);

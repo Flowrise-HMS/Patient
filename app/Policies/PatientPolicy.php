@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Patient\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Patient\Models\Patient;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PatientPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Patient');
@@ -66,5 +66,4 @@ class PatientPolicy
     {
         return $authUser->can('Reorder Patient');
     }
-
 }

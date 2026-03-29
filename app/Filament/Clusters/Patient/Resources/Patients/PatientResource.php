@@ -33,7 +33,6 @@ class PatientResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'mrn';
 
-
     public static function getGloballySearchableAttributes(): array
     {
         return app(PatientSearchService::class)->getSearchableFields();

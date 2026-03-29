@@ -2,10 +2,12 @@
 
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
@@ -20,6 +22,7 @@ use Illuminate\Support\Carbon;
 use Modules\Core\Enums\Title;
 use Modules\Core\Rules\GhanaCard;
 use Modules\Patient\Enums\BloodType;
+use Modules\Patient\Enums\DocumentType;
 use Modules\Patient\Enums\EducationLevel;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\IdentifierType;
@@ -89,6 +92,13 @@ class PatientForm
                             ->maxItems(1)
                             ->minItems(1)
                             ->deletable(false),
+                    ]),
+
+                Step::make('Documents')
+                    ->icon('heroicon-o-document-text')
+                    ->description('Upload patient documents')
+                    ->schema([
+                        static::documentsSection(),
                     ]),
             ])
                 ->skippable()
@@ -385,30 +395,68 @@ class PatientForm
         return [
             Grid::make()->schema([
                 TextInput::make('first_name')
-                        ->label('First Name')
-                        ->required()
-                        ->autofocus(),
+                    ->label('First Name')
+                    ->required()
+                    ->autofocus(),
 
-                    TextInput::make('last_name')
-                        ->label('Last Name')
-                        ->required(),
+                TextInput::make('last_name')
+                    ->label('Last Name')
+                    ->required(),
 
-                    DateTimePicker::make('date_of_birth')
-                        ->label('Date of Birth')
-                        ->required()
-                        ->native(false)
-                        ->displayFormat('d M Y'),
+                DateTimePicker::make('date_of_birth')
+                    ->label('Date of Birth')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d M Y'),
 
-                    Select::make('gender')
-                        ->label('Gender')
-                        ->required()
-                        ->options(Gender::class),
+                Select::make('gender')
+                    ->label('Gender')
+                    ->required()
+                    ->options(Gender::class),
 
                 PhoneInput::make('phone')
-                        ->label('Phone Number')
+                    ->label('Phone Number')
+                    ->required()
+                    ->defaultCountry(config('core.default_country_code', 'GH')),
+            ]),
+        ];
+    }
+
+    public static function documentsSection(): array
+    {
+        return [
+            Repeater::make('documents')
+                ->relationship('documents')
+                ->schema([
+                    TextInput::make('title')
+                        ->label('Document Title')
                         ->required()
-                        ->defaultCountry(config('core.default_country_code', 'GH')),
-            ])
+                        ->placeholder('e.g., National ID Card'),
+
+                    Select::make('document_type')
+                        ->label('Document Type')
+                        ->options(DocumentType::class)
+                        ->required()
+                        ->live(),
+
+                    DatePicker::make('expires_at')
+                        ->label('Expiry Date')
+                        ->native(false)
+                        ->displayFormat('d M Y')
+                        ->minDate(now()),
+
+                    Textarea::make('description')
+                        ->label('Description')
+                        ->placeholder('Optional notes about this document')
+                        ->rows(2),
+
+                    Textarea::make('notes')
+                        ->label('Internal Notes')
+                        ->placeholder('Internal notes (not visible to patient)')
+                        ->rows(2),
+                ])
+                ->columns(2)
+                ->addActionLabel('Add Document'),
         ];
     }
 }

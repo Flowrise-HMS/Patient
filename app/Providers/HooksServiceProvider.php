@@ -5,6 +5,8 @@ namespace Modules\Patient\Providers;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use Modules\Patient\Livewire\AddPatientButton;
 
 class HooksServiceProvider extends ServiceProvider
 {
@@ -25,7 +27,7 @@ class HooksServiceProvider extends ServiceProvider
     {
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-            fn(): string => \Livewire\Livewire::mount(\Modules\Patient\Livewire\AddPatientButton::class)
+            fn (): string => Livewire::mount(AddPatientButton::class)
         );
     }
 }
