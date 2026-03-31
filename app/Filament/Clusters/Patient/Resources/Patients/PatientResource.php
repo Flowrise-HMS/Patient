@@ -17,6 +17,7 @@ use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\CreatePat
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\EditPatient;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatients;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ViewPatient;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\AllergiesRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientInfolist;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Tables\PatientsTable;
@@ -66,7 +67,7 @@ class PatientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AllergiesRelationManager::class,
         ];
     }
 

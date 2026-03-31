@@ -94,15 +94,9 @@ class PatientForm
                             ->deletable(false),
                     ]),
 
-                Step::make('Documents')
-                    ->icon('heroicon-o-document-text')
-                    ->description('Upload patient documents')
-                    ->schema([
-                        static::documentsSection(),
-                    ]),
             ])
-                ->skippable()
-                ->columnSpanFull(),
+            ->skippable()
+            ->columnSpanFull(),
         ];
     }
 
