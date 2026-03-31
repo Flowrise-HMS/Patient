@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Clinical\Enums\EncounterStatus;
+use Modules\Clinical\Models\Allergy;
+use Modules\Clinical\Models\Encounter;
+use Modules\Clinical\Models\VitalSign;
 use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Traits\HasAddress;
@@ -77,6 +81,40 @@ class Patient extends BaseModel implements HasMedia
     public function schools(): HasMany
     {
         return $this->hasMany(PatientSchool::class);
+    }
+
+    public function encounters(): HasMany
+    {
+        return $this->hasMany(Encounter::class, 'patient_id');
+    }
+
+    public function latestEncounter()
+    {
+        return $this->hasOne(Encounter::class, 'patient_id')
+            ->orderByDesc('created_at');
+    }
+
+    public function activeEncounter()
+    {
+        return $this->hasOne(Encounter::class, 'patient_id')
+            ->whereIn('status', [
+                EncounterStatus::ARRIVED->value,
+                EncounterStatus::TRIAGED->value,
+                EncounterStatus::IN_PROGRESS->value,
+                EncounterStatus::ON_LEAVE->value,
+            ])
+            ->orderByDesc('created_at');
+    }
+
+    public function latestVitals()
+    {
+        return $this->hasOne(VitalSign::class, 'patient_id')
+            ->latestOfMany('recorded_at');
+    }
+
+    public function allergies(): HasMany
+    {
+        return $this->hasMany(Allergy::class, 'patient_id');
     }
 
     public function currentSchool(): HasMany
