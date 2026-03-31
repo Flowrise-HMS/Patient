@@ -13,7 +13,7 @@ class ViewPatient extends ViewRecord
 
     public function getRecord(): Patient
     {
-        return parent::getRecord()->load(['documents.media', 'identifiers', 'emergencyContacts', 'schools']);
+        return parent::getRecord()->load(['identifiers', 'emergencyContacts', 'schools']);
     }
 
     protected function getHeaderActions(): array
