@@ -3,6 +3,11 @@
 namespace Modules\Patient\Models;
 
 use App\Models\User;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Support\Enums\Alignment;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -200,4 +205,6 @@ class Patient extends BaseModel implements HasMedia
     {
         return $this->getMedia('documents');
     }
+
+    
 }

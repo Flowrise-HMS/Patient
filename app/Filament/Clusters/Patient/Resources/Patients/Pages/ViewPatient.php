@@ -2,8 +2,10 @@
 
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Clinical\Filament\Clusters\Workspace\Pages\PatientProfile;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Modules\Patient\Models\Patient;
 
@@ -19,6 +21,8 @@ class ViewPatient extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            PatientResource::profileAction(),
+            PatientResource::timelineAction(),
             EditAction::make(),
         ];
     }

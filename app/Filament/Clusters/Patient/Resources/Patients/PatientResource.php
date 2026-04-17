@@ -3,6 +3,7 @@
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients;
 
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -10,6 +11,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Modules\Clinical\Filament\Clusters\Workspace\Pages\PatientProfile;
+use Modules\Clinical\Filament\Clusters\Workspace\Pages\Timeline;
 use Modules\Core\Enums\NavigationGroup;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
@@ -79,6 +82,24 @@ class PatientResource extends Resource
             'view' => ViewPatient::route('/{record}'),
             'edit' => EditPatient::route('/{record}/edit'),
         ];
+    }
+
+    public static function timelineAction()
+    {
+        return Action::make('view_timeline')
+            ->label('Timeline')
+            ->icon('heroicon-m-clock')
+            ->color('gray')
+            ->url(fn (Patient $record) => Timeline::getUrl(['patient' => $record->id]), shouldOpenInNewTab: true);
+    }
+
+    public static function profileAction()
+    {
+        return Action::make('view_profile')
+                ->label('View Full Profile')
+                ->icon('heroicon-m-user-circle')
+                ->url(fn ($record) => PatientProfile::getUrl(['patient' => $record?->id]), shouldOpenInNewTab: true)
+                ->color('gray');
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
