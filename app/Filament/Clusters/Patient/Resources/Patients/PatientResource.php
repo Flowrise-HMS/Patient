@@ -96,10 +96,10 @@ class PatientResource extends Resource
     public static function profileAction()
     {
         return Action::make('view_profile')
-                ->label('View Full Profile')
-                ->icon('heroicon-m-user-circle')
-                ->url(fn ($record) => PatientProfile::getUrl(['patient' => $record?->id]), shouldOpenInNewTab: true)
-                ->color('gray');
+            ->label('View Full Profile')
+            ->icon('heroicon-m-user-circle')
+            ->url(fn ($record) => PatientProfile::getUrl(['patient' => $record?->id]), shouldOpenInNewTab: true)
+            ->color('gray');
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

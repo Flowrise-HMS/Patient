@@ -95,8 +95,8 @@ class PatientForm
                     ]),
 
             ])
-            ->skippable()
-            ->columnSpanFull(),
+                ->skippable()
+                ->columnSpanFull(),
         ];
     }
 
