@@ -6,11 +6,14 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Modules\Clinical\Enums\EncounterStatus;
 use Modules\Clinical\Models\Allergy;
 use Modules\Clinical\Models\Encounter;
@@ -163,37 +166,18 @@ class Patient extends BaseModel implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('photo')
-            ->singleFile()
-            ->withResponsiveImages();
-
         $this->addMediaCollection('documents');
     }
 
-    public function registerMediaConversions(?Media $media = null): void
+    protected function getPhotoUrlAttribute(): ?string
     {
-        $this->addMediaConversion('thumb')
-            ->width(150)
-            ->height(150);
-
-        $this->addMediaConversion('avatar')
-            ->width(300)
-            ->height(300);
+        return private_url($this->photo);
     }
 
-    public function getPhotoUrlAttribute(): ?string
-    {
-        return $this->getFirstMediaUrl('photo');
-    }
-
-    public function getPhotoAttribute(): ?string
-    {
-        return $this->getFirstMediaUrl('photo');
-    }
 
     public function hasPhoto(): bool
     {
-        return $this->hasMedia('photo');
+        return (bool) $this->photo;
     }
 
     public function getDocumentsAttribute()

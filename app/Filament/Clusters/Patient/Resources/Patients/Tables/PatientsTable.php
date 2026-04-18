@@ -19,6 +19,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Patient\Enums\Gender;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
 
 class PatientsTable
@@ -171,6 +172,9 @@ class PatientsTable
                     ->action(fn ($record) => $record->update(['is_active' => true]))
                     ->visible(fn ($record) => ! $record->is_active)
                     ->requiresConfirmation(),
+                Action::make('activities')
+                    ->icon('heroicon-o-bell-alert')
+                    ->url(fn ($record) => PatientResource::getUrl('activities', ['record' => $record])),
             ])
                 ->label('Actions')
                 ->icon('heroicon-m-ellipsis-horizontal')

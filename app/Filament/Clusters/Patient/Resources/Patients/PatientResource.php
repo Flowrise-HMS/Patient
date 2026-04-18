@@ -18,6 +18,7 @@ use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\CreatePatient;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\EditPatient;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatientActivities;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatients;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ViewPatient;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\AllergiesRelationManager;
@@ -81,6 +82,7 @@ class PatientResource extends Resource
             'create' => CreatePatient::route('/create'),
             'view' => ViewPatient::route('/{record}'),
             'edit' => EditPatient::route('/{record}/edit'),
+            'activities' => ListPatientActivities::route('/{record}/activities'),
         ];
     }
 

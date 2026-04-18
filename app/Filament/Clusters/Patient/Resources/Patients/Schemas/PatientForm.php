@@ -4,9 +4,9 @@ namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -70,7 +70,6 @@ class PatientForm
                                 static::emergencyContactSection(),
                             ])
                             ->defaultItems(1)
-                            ->minItems(1)
                             ->deletable(false),
                     ]),
                 Step::make('Additional')
@@ -89,8 +88,6 @@ class PatientForm
                             ->schema([
                                 static::identifiersSection(),
                             ])
-                            ->maxItems(1)
-                            ->minItems(1)
                             ->deletable(false),
                     ]),
 
@@ -174,9 +171,9 @@ class PatientForm
                         ->columnSpan(1),
                 ]),
 
-                SpatieMediaLibraryFileUpload::make('photo')
-                    ->image()
-                    ->responsiveImages(),
+                FileUpload::make('photo')
+                    ->visibility('private')
+                    ->image(),
 
                 Toggle::make('is_date_of_birth_estimated')
                     ->label('Date of birth is estimated')
