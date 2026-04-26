@@ -8,5 +8,4 @@ use pxlrbt\FilamentActivityLog\Pages\ListActivities;
 class ListPatientActivities extends ListActivities
 {
     protected static string $resource = PatientResource::class;
-
 }

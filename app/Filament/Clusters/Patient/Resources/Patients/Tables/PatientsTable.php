@@ -18,6 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
@@ -151,20 +152,16 @@ class PatientsTable
 
     public static function getActions(): array
     {
+        $actions = app(PatientActions::class);
+
         return [
             ActionGroup::make([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                Action::make('deactivate')
-                    ->label('Deactivate')
-                    ->icon('heroicon-o-user-minus')
-                    ->color('warning')
-                    ->action(fn ($record) => $record->update(['is_active' => false]))
-                    ->visible(fn ($record) => $record->is_active)
-                    ->requiresConfirmation()
-                    ->modalHeading('Deactivate Patient?')
-                    ->modalDescription('This patient will no longer be able to access services. You can reactivate them later.'),
+                $actions->deactivate(),
+                $actions->profileAction(),
+                $actions->timelineAction(),
                 Action::make('activate')
                     ->label('Activate')
                     ->icon('heroicon-o-user-plus')
