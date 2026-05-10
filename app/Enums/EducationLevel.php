@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum EducationLevel: string implements HasColor, HasLabel
+enum EducationLevel: string implements HasColor, HasDescription, HasLabel
 {
     case NONE = 'none';
     case PRIMARY = 'primary';
@@ -42,6 +43,20 @@ enum EducationLevel: string implements HasColor, HasLabel
             self::TERTIARY => 'success',
             self::POSTGRADUATE => 'success',
             self::UNKNOWN => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::NONE => 'No formal schooling recorded.',
+            self::PRIMARY => 'Primary or elementary education.',
+            self::JUNIOR_SECONDARY => 'Junior secondary or middle school level.',
+            self::SENIOR_SECONDARY => 'Senior secondary or high school level.',
+            self::VOCATIONAL => 'Trade, technical, or vocational training.',
+            self::TERTIARY => 'College, polytechnic, or undergraduate university.',
+            self::POSTGRADUATE => 'Graduate or postgraduate studies.',
+            self::UNKNOWN => 'Education level not stated.',
         };
     }
 

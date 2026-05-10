@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum BloodType: string implements HasColor, HasLabel
+enum BloodType: string implements HasColor, HasDescription, HasLabel
 {
     case A_POSITIVE = 'A+';
     case A_NEGATIVE = 'A-';
@@ -41,6 +42,21 @@ enum BloodType: string implements HasColor, HasLabel
             self::AB_POSITIVE, self::AB_NEGATIVE => 'primary',
             self::O_POSITIVE, self::O_NEGATIVE => 'success',
             self::UNKNOWN => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::A_POSITIVE => 'Blood group A, Rh positive.',
+            self::A_NEGATIVE => 'Blood group A, Rh negative.',
+            self::B_POSITIVE => 'Blood group B, Rh positive.',
+            self::B_NEGATIVE => 'Blood group B, Rh negative.',
+            self::AB_POSITIVE => 'Blood group AB, Rh positive.',
+            self::AB_NEGATIVE => 'Blood group AB, Rh negative.',
+            self::O_POSITIVE => 'Blood group O, Rh positive.',
+            self::O_NEGATIVE => 'Blood group O, Rh negative (universal red cell donor).',
+            self::UNKNOWN => 'ABO/Rh not known or not recorded.',
         };
     }
 

@@ -7,6 +7,8 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
+use Modules\Billing\Services\PatientBalanceQueryService;
 
 class PatientInfolist
 {
@@ -27,6 +29,8 @@ class PatientInfolist
                             ->label('MRN'),
                     ]),
 
+                ...static::billingAccountSection(),
+
                 Section::make('Documents')
                     ->schema([
                         RepeatableEntry::make('documents')
@@ -45,5 +49,28 @@ class PatientInfolist
                             ->columns(4),
                     ]),
             ]);
+    }
+
+    /**
+     * @return array<int, Section>
+     */
+    protected static function billingAccountSection(): array
+    {
+        if (! class_exists(PatientBalanceQueryService::class)) {
+            return [];
+        }
+
+        return [
+            Section::make('Account')
+                ->visible(fn (): bool => Auth::user()?->can('view_patient_balance') ?? false)
+                ->schema([
+                    TextEntry::make('pending_balance')
+                        ->label('Outstanding balance')
+                        ->state(fn ($record): string => app(PatientBalanceQueryService::class)->openBalanceForPatient((string) $record->id))
+                        ->badge()
+                        ->color(fn (string $state): string => bccomp($state, '0', 2) > 0 ? 'danger' : 'gray')
+                        ->formatStateUsing(fn (string $state): string => 'GHS '.number_format((float) $state, 2)),
+                ]),
+        ];
     }
 }

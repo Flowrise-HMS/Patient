@@ -22,6 +22,9 @@ class ViewPatient extends ViewRecord
         $actions = app(PatientActions::class)->forPatient($this->getRecord());
 
         return [
+            $actions->printHospitalCardAction(),
+            $actions->dischargeAction(),
+            $actions->medicationOrder(),
             $actions->profileAction(),
             $actions->timelineAction(),
             EditAction::make(),

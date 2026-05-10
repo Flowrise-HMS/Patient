@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum IdentifierType: string implements HasColor, HasLabel
+enum IdentifierType: string implements HasColor, HasDescription, HasLabel
 {
     case MRN = 'mrn';
     case NHIS = 'nhis';
@@ -48,6 +49,22 @@ enum IdentifierType: string implements HasColor, HasLabel
             self::VOTER_ID => 'gray',
             self::ALIEN_ID => 'warning',
             self::OTHER => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::MRN => 'Internal medical record number assigned by the facility.',
+            self::NHIS => 'National Health Insurance Scheme membership identifier.',
+            self::NATIONAL_ID => 'National identity card number (e.g. Ghana Card).',
+            self::PASSPORT => 'Machine-readable passport number.',
+            self::DRIVER_LICENSE => 'Driver or road license number.',
+            self::BIRTH_CERTIFICATE => 'Birth registration reference number.',
+            self::SSNIT => 'Social security or national pension identifier.',
+            self::VOTER_ID => 'Electoral commission voter identification.',
+            self::ALIEN_ID => 'Residence permit or foreign national ID.',
+            self::OTHER => 'Alternate identifier not listed above.',
         };
     }
 

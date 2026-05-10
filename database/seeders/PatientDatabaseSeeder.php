@@ -11,6 +11,8 @@ class PatientDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            PatientCustomPermissionSeeder::class,
+        ]);
     }
 }

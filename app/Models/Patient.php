@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+use Modules\Appointment\Models\Appointment;
 use Modules\Clinical\Enums\EncounterStatus;
 use Modules\Clinical\Models\Allergy;
 use Modules\Clinical\Models\Encounter;
@@ -31,7 +33,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia
 {
-    use HasAddress, HasContact, HasFactory, HasUuids, InteractsWithMedia, SoftDeletes;
+    use HasAddress, HasContact, HasFactory, HasUuids, InteractsWithMedia, Notifiable, SoftDeletes;
 
     protected $keyType = 'string';
 
@@ -85,6 +87,11 @@ class Patient extends BaseModel implements HasMedia
     public function encounters(): HasMany
     {
         return $this->hasMany(Encounter::class, 'patient_id');
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'patient_id');
     }
 
     public function latestEncounter()
@@ -163,6 +170,16 @@ class Patient extends BaseModel implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('documents');
+    }
+
+    public function routeNotificationForMail($notification = null): ?string
+    {
+        return $this->email ?: null;
+    }
+
+    public function routeNotificationForSms($notification = null): ?string
+    {
+        return $this->phone ?: null;
     }
 
     protected function getPhotoUrlAttribute(): ?string

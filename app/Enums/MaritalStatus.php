@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum MaritalStatus: string implements HasColor, HasLabel
+enum MaritalStatus: string implements HasColor, HasDescription, HasLabel
 {
     case SINGLE = 'single';
     case MARRIED = 'married';
@@ -39,6 +40,19 @@ enum MaritalStatus: string implements HasColor, HasLabel
             self::SEPARATED => 'warning',
             self::COHABITING => 'primary',
             self::UNKNOWN => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::SINGLE => 'Not currently married or in a registered partnership.',
+            self::MARRIED => 'Legally married or customary marriage recognized.',
+            self::DIVORCED => 'Marriage legally dissolved.',
+            self::WIDOWED => 'Spouse deceased.',
+            self::SEPARATED => 'Married but living apart without divorce finalized.',
+            self::COHABITING => 'Partners living together without formal marriage.',
+            self::UNKNOWN => 'Marital status not collected or declined.',
         };
     }
 

@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum SchoolType: string implements HasColor, HasLabel
+enum SchoolType: string implements HasColor, HasDescription, HasLabel
 {
     case NURSERY = 'nursery';
     case CRECHE = 'creche';
@@ -47,6 +48,23 @@ enum SchoolType: string implements HasColor, HasLabel
             self::TERTIARY, self::UNIVERSITY => 'success',
             self::PROFESSIONAL => 'danger',
             self::OTHER => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::NURSERY => 'Early childhood nursery program.',
+            self::CRECHE => 'Daycare or creche for young children.',
+            self::KINDERGARTEN => 'Pre-primary kindergarten level.',
+            self::PRIMARY => 'Primary or elementary school.',
+            self::JUNIOR_HIGH => 'Junior secondary or middle school.',
+            self::SENIOR_HIGH => 'Senior secondary or high school.',
+            self::VOCATIONAL => 'Technical or vocational training institution.',
+            self::TERTIARY => 'College or polytechnic level.',
+            self::UNIVERSITY => 'Degree-granting university.',
+            self::PROFESSIONAL => 'Professional body or licensure program.',
+            self::OTHER => 'School type not listed.',
         };
     }
 

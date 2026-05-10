@@ -3,10 +3,11 @@
 namespace Modules\Patient\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum RelationshipType: string implements HasColor, HasLabel
+enum RelationshipType: string implements HasColor, HasDescription, HasLabel
 {
     case SPOUSE = 'spouse';
     case PARENT = 'parent';
@@ -57,6 +58,25 @@ enum RelationshipType: string implements HasColor, HasLabel
             self::GUARDIAN => 'info',
             self::CAREGIVER => 'primary',
             self::OTHER => 'gray',
+        };
+    }
+
+    public function getDescription(): string|Htmlable|null
+    {
+        return match ($this) {
+            self::SPOUSE => 'Legally recognized spouse or partner.',
+            self::PARENT => 'Biological, adoptive, or legal parent.',
+            self::CHILD => 'Son or daughter of the patient.',
+            self::SIBLING => 'Brother or sister of the patient.',
+            self::GRANDPARENT => 'Grandmother or grandfather of the patient.',
+            self::GRANDCHILD => 'Grandchild of the patient.',
+            self::UNCLE => 'Uncle or aunt family line.',
+            self::FRIEND => 'Non-family contact chosen by the patient.',
+            self::NEIGHBOR => 'Neighbor or community contact.',
+            self::COLLEAGUE => 'Work or school associate.',
+            self::GUARDIAN => 'Legal guardian for decisions or minors.',
+            self::CAREGIVER => 'Primary informal caregiver.',
+            self::OTHER => 'Relationship not otherwise categorized.',
         };
     }
 

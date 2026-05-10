@@ -67,9 +67,15 @@ class PatientResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
+        $relations = [
             AllergiesRelationManager::class,
         ];
+
+        if (class_exists(\Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager::class)) {
+            $relations[] = \Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager::class;
+        }
+
+        return $relations;
     }
 
     public static function getPages(): array

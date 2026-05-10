@@ -18,6 +18,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
@@ -88,6 +90,16 @@ class PatientsTable
                 ->falseIcon('heroicon-o-x-circle')
                 ->trueColor('success')
                 ->falseColor('danger'),
+            TextColumn::make('outstanding_balance')
+                ->label('Balance due')
+                ->badge()
+                ->visible(fn (): bool => class_exists(PatientBalanceQueryService::class) && (Auth::user()?->can('view_patient_balance') ?? false))
+                ->color(fn (?string $state): string => $state !== null && bccomp($state, '0', 2) > 0 ? 'danger' : 'gray')
+                ->formatStateUsing(fn (?string $state): string => $state !== null ? 'GHS '.number_format((float) $state, 2) : '—')
+                ->getStateUsing(fn ($record): ?string => class_exists(PatientBalanceQueryService::class)
+                    ? app(PatientBalanceQueryService::class)->openBalanceForPatient((string) $record->id)
+                    : null)
+                ->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('created_at')
                 ->label('Registered')
                 ->dateTime('d M Y')

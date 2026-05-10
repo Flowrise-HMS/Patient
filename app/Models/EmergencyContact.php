@@ -5,11 +5,12 @@ namespace Modules\Patient\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Modules\Patient\Database\Factories\EmergencyContactFactory;
 
 class EmergencyContact extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, Notifiable;
 
     protected $keyType = 'string';
 
@@ -18,7 +19,7 @@ class EmergencyContact extends Model
      */
     protected $fillable = [
         'patient_id', 'name', 'relationship', 'relationship_other', 'phone', 'alternate_phone', 'email', 'address', 'is_primary', 'can_receive_sms',
-        'can_make_medical_decisions', 'note',
+        'can_make_medical_decisions', 'notify_for_billing', 'note',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class EmergencyContact extends Model
         'is_primary' => 'boolean',
         'can_receive_sms' => 'boolean',
         'can_make_medical_decisions' => 'boolean',
+        'notify_for_billing' => 'boolean',
     ];
 
     protected static function newFactory(): EmergencyContactFactory
@@ -40,4 +42,15 @@ class EmergencyContact extends Model
     {
         return $this->belongsTo(Patient::class, 'patient_id');
     }
+
+    public function routeNotificationForMail($notification = null): ?string
+    {
+        return $this->email ?: null;
+    }
+
+    public function routeNotificationForSms($notification = null): ?string
+    {
+        return $this->can_receive_sms ? ($this->phone ?: null) : null;
+    }
 }
+
