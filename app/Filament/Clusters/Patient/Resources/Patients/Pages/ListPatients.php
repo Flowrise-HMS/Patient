@@ -13,6 +13,9 @@ class ListPatients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            \Filament\Actions\ImportAction::make()
+                ->importer(\Modules\Patient\Filament\Imports\PatientImporter::class)
+                ->color('info'),
             CreateAction::make(),
         ];
     }
