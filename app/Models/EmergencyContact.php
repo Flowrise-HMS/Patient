@@ -53,4 +53,3 @@ class EmergencyContact extends Model
         return $this->can_receive_sms ? ($this->phone ?: null) : null;
     }
 }
-

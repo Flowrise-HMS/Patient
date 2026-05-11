@@ -6,8 +6,8 @@ use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Number;
-use Modules\Patient\Models\Patient;
 use Modules\Patient\Classes\Services\PatientService;
+use Modules\Patient\Models\Patient;
 
 class PatientImporter extends Importer
 {
@@ -87,22 +87,26 @@ class PatientImporter extends Importer
     {
         if (isset($this->data['global_uuid'])) {
             $patient = Patient::where('global_uuid', $this->data['global_uuid'])->first();
-            if ($patient) return $patient;
+            if ($patient) {
+                return $patient;
+            }
         }
 
         if (isset($this->data['mrn'])) {
             $patient = Patient::where('mrn', $this->data['mrn'])->first();
-            if ($patient) return $patient;
+            if ($patient) {
+                return $patient;
+            }
         }
 
-        return new Patient();
+        return new Patient;
     }
 
     public function saveRecord(): void
     {
         $patientService = app(PatientService::class);
         $data = $this->record->getAttributes();
-        
+
         // Include any custom data keys that might not map directly to attributes
         if (isset($this->data['identifiers'])) {
             $data['identifiers'] = $this->data['identifiers'];
@@ -120,10 +124,10 @@ class PatientImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your patient import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your patient import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;

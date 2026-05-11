@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager;
 use Modules\Core\Enums\NavigationGroup;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
@@ -71,8 +72,8 @@ class PatientResource extends Resource
             AllergiesRelationManager::class,
         ];
 
-        if (class_exists(\Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager::class)) {
-            $relations[] = \Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager::class;
+        if (class_exists(PatientInvoicesRelationManager::class)) {
+            $relations[] = PatientInvoicesRelationManager::class;
         }
 
         return $relations;
