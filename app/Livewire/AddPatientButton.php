@@ -9,11 +9,10 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use Modules\Core\Classes\Services\BranchService;
+use Modules\Insurance\Services\PatientInsuranceService;
 use Modules\Patient\Classes\Services\PatientService;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Models\Patient;
@@ -42,15 +41,19 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                 $service = app(PatientService::class);
 
                 $patient = $service->create([
-                    'first_name' => isset($data['first_name']) ? $data['first_name']: null,
-                    'last_name' => isset($data['last_name']) ? $data['last_name']: null,
-                    'date_of_birth' => isset($data['date_of_birth']) ? $data['date_of_birth']: null,
-                    'gender' => isset($data['gender']) ? $data['gender']: null,
-                    'phone' => isset($data['phone']) ? $data['phone']: null,
-                    'branch_id' => isset($data['branch_id']) ?$data['branch_id']: app(BranchService::class)->getDefaultBranchId(),
+                    'first_name' => isset($data['first_name']) ? $data['first_name'] : null,
+                    'last_name' => isset($data['last_name']) ? $data['last_name'] : null,
+                    'date_of_birth' => isset($data['date_of_birth']) ? $data['date_of_birth'] : null,
+                    'gender' => isset($data['gender']) ? $data['gender'] : null,
+                    'phone' => isset($data['phone']) ? $data['phone'] : null,
+                    'branch_id' => isset($data['branch_id']) ? $data['branch_id'] : app(BranchService::class)->getDefaultBranchId(),
                 ]);
 
                 if ($patient) {
+                    if (config('insurance.enabled', true) && app()->bound(PatientInsuranceService::class)) {
+                        app(PatientInsuranceService::class)->createPolicyFromData($patient->id, $data);
+                    }
+
                     Notification::make()
                         ->title(__('Patient has been added successfully'))
                         ->body("MRN: {$patient->mrn}")

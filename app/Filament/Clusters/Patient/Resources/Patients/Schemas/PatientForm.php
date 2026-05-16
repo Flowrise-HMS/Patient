@@ -21,6 +21,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 use Modules\Core\Enums\Title;
 use Modules\Core\Rules\GhanaCard;
+use Modules\Insurance\Filament\Schemas\PatientInsuranceSchema;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\DocumentType;
 use Modules\Patient\Enums\EducationLevel;
@@ -383,7 +384,7 @@ class PatientForm
 
     public static function simpleForm(): array
     {
-        return [
+        $form = [
             Grid::make()->schema([
                 TextInput::make('first_name')
                     ->label('First Name')
@@ -411,6 +412,12 @@ class PatientForm
                     ->defaultCountry(config('core.default_country_code', 'GH')),
             ]),
         ];
+
+        if (class_exists(PatientInsuranceSchema::class) && config('insurance.enabled', true)) {
+            $form = array_merge($form, PatientInsuranceSchema::getFields());
+        }
+
+        return $form;
     }
 
     public static function documentsSection(): array

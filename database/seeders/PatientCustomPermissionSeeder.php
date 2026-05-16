@@ -13,16 +13,12 @@ class PatientCustomPermissionSeeder extends Seeder
     protected array $matrix = [
         'print_hospital_card' => ['super_admin', 'receptionist', 'admissions_staff', 'nurse', 'doctor'],
         'discharge_patient' => ['super_admin', 'doctor', 'nursing_supervisor'],
-        'view_patient_balance' => ['super_admin', 'billing_clerk', 'medical_biller', 'finance_officer', 'receptionist'],
+        'view_patient_balance' => ['super_admin', 'billing_clerk', 'finance_officer', 'receptionist'],
     ];
 
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        foreach (array_keys($this->matrix) as $name) {
-            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
-        }
 
         foreach ($this->matrix as $name => $roles) {
             $perm = Permission::query()->where(['name' => $name, 'guard_name' => 'web'])->first();
