@@ -72,6 +72,21 @@ class PatientResource extends Resource
             AllergiesRelationManager::class,
         ];
 
+        $clinicalRelations = [
+            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\VitalSignsRelationManager',
+            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\ClinicalNotesRelationManager',
+            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\ServiceRequestsRelationManager',
+            'Modules\Clinical\Filament\RelationManagers\Patient\PatientEncountersRelationManager',
+            'Modules\Clinical\Filament\RelationManagers\Patient\PatientMedicationAdministrationsRelationManager',
+            'Modules\Clinical\Filament\RelationManagers\Patient\PatientTasksRelationManager',
+        ];
+
+        foreach ($clinicalRelations as $relationClass) {
+            if (class_exists($relationClass)) {
+                $relations[] = $relationClass;
+            }
+        }
+
         if (class_exists(PatientInvoicesRelationManager::class)) {
             $relations[] = PatientInvoicesRelationManager::class;
         }
