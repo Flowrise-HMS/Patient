@@ -5,10 +5,13 @@ namespace Modules\Patient\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Modules\Core\Classes\Services\BranchService;
@@ -36,7 +39,12 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
             ->modalDescription('Fast registration for emergency cases')
             ->icon('heroicon-o-user-plus')
             ->authorize(Gate::allows('create', Patient::class))
-            ->schema(PatientForm::simpleForm())
+            ->schema([
+                ...PatientForm::simpleForm(),
+                Toggle::make('print_card')
+                    ->label(__('Print hospital card'))
+                    ->visible(fn (): bool => Auth::check() && Auth::user()?->can('print_hospital_card')),
+            ])
             ->action(function (array $data): void {
                 $service = app(PatientService::class);
 
@@ -61,6 +69,10 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                         ->send();
 
                     $this->dispatch('patientCreated', patientId: $patient->id);
+
+                    if (! empty($data['print_card'])) {
+                        $this->redirect(route('patients.hospital-card', $patient));
+                    }
                 } else {
                     Notification::make()
                         ->title(__('Patient was not added'))

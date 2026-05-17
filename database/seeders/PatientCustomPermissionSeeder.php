@@ -12,8 +12,9 @@ class PatientCustomPermissionSeeder extends Seeder
     /** @var array<string, string[]> permission name => web-guard roles */
     protected array $matrix = [
         'print_hospital_card' => ['super_admin', 'receptionist', 'admissions_staff', 'nurse', 'doctor'],
-        'discharge_patient' => ['super_admin', 'doctor', 'nursing_supervisor'],
-        'view_patient_balance' => ['super_admin', 'billing_clerk', 'finance_officer', 'receptionist'],
+        'discharge_patient' => ['super_admin', 'doctor', 'nurse'],
+        'view_patient_balance' => ['super_admin', 'billing_clerk', 'receptionist'],
+        'import_patients' => ['super_admin', 'receptionist', 'admissions_staff'],
     ];
 
     public function run(): void

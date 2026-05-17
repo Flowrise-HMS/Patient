@@ -79,12 +79,8 @@
                 <!-- PHOTO -->
                 <div class="col-span-1 flex flex-col">
                     <div class="w-[60px] h-[60px] rounded-md overflow-hidden shadow-inner bg-gray-200">
-                        @php
-                            $photo = $patient->photo_url;
-                        @endphp
-
-                        @if($photo)
-                            <img src="{{ $photo }}" class="w-[60px] h-[60px] object-cover" alt="" />
+                        @if($patient->hasPhoto())
+                            <img src="{{ $patient->photo_url }}" class="w-[60px] h-[60px] object-cover" alt="" />
                         @else
                             <div class="w-[60px] h-[60px] flex items-center justify-center text-[8px] text-gray-600">{{ __('No Photo') }}
                             </div>
@@ -140,7 +136,7 @@
                         <small>{{ __('Bring it each time you attend Hospital') }}</small>
                     </div>
                 </div>
-                <div class="flex items-center mt-1 col-span-3">
+                <div class="flex items-center text-center justify-center mt-1 col-span-3">
                     <div class="barcode leading-none">
                         *{{ $patient->mrn }}*
                     </div>

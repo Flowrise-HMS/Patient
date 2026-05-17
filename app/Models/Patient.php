@@ -152,6 +152,13 @@ class Patient extends BaseModel implements HasMedia
         return implode(' ', $parts);
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        $fullname = $this->getFullNameAttribute();
+        $mrn = $this->mrn;
+        return "$fullname ($mrn)";
+    }
+
     public function getAgeAttribute(): ?int
     {
         return $this->date_of_birth?->age;
