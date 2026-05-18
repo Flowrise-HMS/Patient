@@ -24,8 +24,20 @@ class PatientSearchServiceTest extends TestCase
 
     public function test_search_returns_matching_patients(): void
     {
-        $john = Patient::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-        $jane = Patient::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+        $john = Patient::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'email' => 'john.doe@example.com',
+            'phone' => '0244123456',
+            'middle_name' => null,
+        ]);
+        $jane = Patient::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'email' => 'jane.smith@example.com',
+            'phone' => '0555555555',
+            'middle_name' => null,
+        ]);
 
         $results = $this->service->search('John');
 
@@ -35,8 +47,20 @@ class PatientSearchServiceTest extends TestCase
 
     public function test_search_returns_multiple_matches(): void
     {
-        $john1 = Patient::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-        $john2 = Patient::factory()->create(['first_name' => 'Johnny', 'last_name' => 'Smith']);
+        $john1 = Patient::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'email' => 'john1@example.com',
+            'phone' => '0244123456',
+            'middle_name' => null,
+        ]);
+        $john2 = Patient::factory()->create([
+            'first_name' => 'Johnny',
+            'last_name' => 'Smith',
+            'email' => 'john2@example.com',
+            'phone' => '0244123457',
+            'middle_name' => null,
+        ]);
 
         $results = $this->service->search('John');
 

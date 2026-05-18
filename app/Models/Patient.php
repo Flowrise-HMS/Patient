@@ -103,11 +103,9 @@ class Patient extends BaseModel implements HasMedia
     public function activeEncounter()
     {
         return $this->hasOne(Encounter::class, 'patient_id')
-            ->whereIn('status', [
-                EncounterStatus::ARRIVED->value,
-                EncounterStatus::TRIAGED->value,
-                EncounterStatus::IN_PROGRESS->value,
-                EncounterStatus::ON_LEAVE->value,
+            ->whereNotIn('status', [
+                EncounterStatus::FINISHED->value,
+                EncounterStatus::CANCELLED->value,
             ])
             ->orderByDesc('created_at');
     }

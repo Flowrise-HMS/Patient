@@ -23,6 +23,7 @@ class ViewPatient extends ViewRecord
 
         return [
             $actions->printHospitalCardAction(),
+            $actions->assignToWardAction(),
             $actions->dischargeAction(),
             $actions->medicationOrder(),
             $actions->profileAction(),
