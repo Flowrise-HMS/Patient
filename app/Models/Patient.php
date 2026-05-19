@@ -104,8 +104,8 @@ class Patient extends BaseModel implements HasMedia
     {
         return $this->hasOne(Encounter::class, 'patient_id')
             ->whereNotIn('status', [
-                EncounterStatus::FINISHED->value,
-                EncounterStatus::CANCELLED->value,
+                EncounterStatus::FINISHED,
+                EncounterStatus::CANCELLED,
             ])
             ->orderByDesc('created_at');
     }
