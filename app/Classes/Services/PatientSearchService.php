@@ -20,8 +20,10 @@ class PatientSearchService
 
     protected array $relationSearchableFields = [
         'identifiers.value',
+        'identifiers.type',
         'emergencyContacts.phone',
         'emergencyContacts.name',
+        'insurancePolicies.member_number',
     ];
 
     public function search(string $term, int $limit = 10): Collection
@@ -152,14 +154,27 @@ class PatientSearchService
             ["%{$term}%"]
         );
 
-        $query->orWhereHas('identifiers', function ($q) use ($term) {
-            $q->where('value', 'LIKE', "%{$term}%");
-        });
+        $grouped = [];
+        foreach ($this->relationSearchableFields as $field) {
+            $parts = explode('.', $field, 2);
+            if (count($parts) !== 2) {
+                continue;
+            }
+            $grouped[$parts[0]][] = $parts[1];
+        }
 
-        $query->orWhereHas('emergencyContacts', function ($q) use ($term) {
-            $q->where('name', 'LIKE', "%{$term}%")
-                ->orWhere('phone', 'LIKE', "%{$term}%");
-        });
+        foreach ($grouped as $relation => $columns) {
+            if ($relation === 'insurancePolicies' && ! config('insurance.enabled', true)) {
+                continue;
+            }
+            $query->orWhereHas($relation, function ($q) use ($columns, $term) {
+                $first = array_shift($columns);
+                $q->where($first, 'LIKE', "%{$term}%");
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'LIKE', "%{$term}%");
+                }
+            });
+        }
     }
 
     public function normalizeTerm(string $term): string
