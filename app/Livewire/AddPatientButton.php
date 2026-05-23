@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Modules\Clinical\Filament\Clusters\Workspace\Pages\PatientProfile;
 use Modules\Core\Classes\Services\BranchService;
 use Modules\Insurance\Services\PatientInsuranceService;
 use Modules\Patient\Classes\Services\PatientService;
@@ -31,7 +32,8 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
 
     public function addPatientAction(): Action
     {
-        return Action::make('addPatient')
+        return \Filament\Actions\CreateAction::make('addPatient')
+            ->model(Patient::class)
             ->color('info')
             ->slideOver()
             ->tooltip(__('Add Patient'))
@@ -40,44 +42,47 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
             ->icon('heroicon-o-user-plus')
             ->authorize(Gate::allows('create', Patient::class))
             ->schema([
-                ...PatientForm::simpleForm(),
+                ...PatientForm::getSteps(),
                 Toggle::make('print_card')
                     ->label(__('Print hospital card'))
                     ->visible(fn (): bool => Auth::check() && Auth::user()?->can('print_hospital_card')),
             ])
-            ->action(function (array $data): void {
-                $service = app(PatientService::class);
+            ->mutateDataUsing(function (array $data): array {
+                $data['branch_id'] = $data['branch_id'] ?? app(BranchService::class)->getDefaultBranchId();
+                $data['created_by'] = Auth::id();
+                if (function_exists('generate_global_uuid')) {
+                    $data['global_uuid'] = generate_global_uuid();
+                }
+                return $data;
+            })
+            ->after(function (Patient $record, array $data): void {
+                if (config('insurance.enabled', true) && app()->bound(PatientInsuranceService::class)) {
+                    app(PatientInsuranceService::class)->createPolicyFromData($record->id, $data);
+                }
 
-                $patient = $service->create([
-                    'first_name' => isset($data['first_name']) ? $data['first_name'] : null,
-                    'last_name' => isset($data['last_name']) ? $data['last_name'] : null,
-                    'date_of_birth' => isset($data['date_of_birth']) ? $data['date_of_birth'] : null,
-                    'gender' => isset($data['gender']) ? $data['gender'] : null,
-                    'phone' => isset($data['phone']) ? $data['phone'] : null,
-                    'branch_id' => isset($data['branch_id']) ? $data['branch_id'] : app(BranchService::class)->getDefaultBranchId(),
+                if (class_exists(\Modules\Patient\Events\PatientRegistered::class)) {
+                    event(new \Modules\Patient\Events\PatientRegistered($record));
+                }
+
+                \Illuminate\Support\Facades\Log::info('Patient registered via quick add', [
+                    'patient_id' => $record->id,
+                    'mrn' => $record->mrn,
+                    'branch_id' => $record->branch_id,
+                    'registered_by' => Auth::id(),
                 ]);
 
-                if ($patient) {
-                    if (config('insurance.enabled', true) && app()->bound(PatientInsuranceService::class)) {
-                        app(PatientInsuranceService::class)->createPolicyFromData($patient->id, $data);
-                    }
+                Notification::make()
+                    ->title(__('Patient has been added successfully'))
+                    ->body("MRN: {$record->mrn}")
+                    ->success()
+                    ->send();
 
-                    Notification::make()
-                        ->title(__('Patient has been added successfully'))
-                        ->body("MRN: {$patient->mrn}")
-                        ->success()
-                        ->send();
+                $this->dispatch('patientCreated', patientId: $record->id);
 
-                    $this->dispatch('patientCreated', patientId: $patient->id);
-
-                    if (! empty($data['print_card'])) {
-                        $this->redirect(route('patients.hospital-card', $patient));
-                    }
-                } else {
-                    Notification::make()
-                        ->title(__('Patient was not added'))
-                        ->danger()
-                        ->send();
+                if (! empty($data['print_card'])) {
+                    $this->redirect(route('patients.hospital-card', $record));
+                } elseif (PatientProfile::canAccess()) {
+                    $this->redirect(PatientProfile::getUrl(['patient' => $record?->id]));
                 }
             });
     }

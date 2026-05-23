@@ -29,6 +29,7 @@ use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\IdentifierType;
 use Modules\Patient\Enums\MaritalStatus;
 use Modules\Patient\Enums\RelationshipType;
+use Modules\Patient\Models\Patient;
 use Nnjeim\World\Models\City;
 use Nnjeim\World\Models\Country;
 use Nnjeim\World\Models\State;
@@ -39,6 +40,7 @@ class PatientForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->model(Patient::class)
             ->components(static::getSteps());
     }
 
@@ -48,23 +50,25 @@ class PatientForm
             Wizard::make([
                 Step::make('Demographics')
                     ->icon('heroicon-o-user')
-                    ->description('Basic patient information')
+                    ->description('Basic information & Identifiers')
                     ->schema([
                         static::demographicsSection(),
+                        Repeater::make('identifiers')
+                            ->relationship('identifiers')
+                            ->schema([
+                                static::identifiersSection(),
+                            ])
+                            ->deletable(false),
+                        static::insuranceSection(),
+                        static::additionalSection(),
                     ]),
 
                 Step::make('Contact')
                     ->icon('heroicon-o-phone')
-                    ->description('How to reach the patient')
+                    ->description('Contact & Emergency information')
                     ->schema([
                         static::contactSection(),
                         static::addressSection(),
-                    ]),
-
-                Step::make('Emergency Contact')
-                    ->icon('heroicon-o-exclamation-circle')
-                    ->description('Who to contact in emergencies')
-                    ->schema([
                         Repeater::make('emergencyContacts')
                             ->relationship('emergencyContacts')
                             ->schema([
@@ -73,24 +77,7 @@ class PatientForm
                             ->defaultItems(1)
                             ->deletable(false),
                     ]),
-                Step::make('Additional')
-                    ->icon('heroicon-o-information-circle')
-                    ->description('Additional patient details')
-                    ->schema([
-                        static::additionalSection(),
-                    ]),
 
-                Step::make('Identifiers')
-                    ->icon('heroicon-o-identification')
-                    ->description('Patient identification documents')
-                    ->schema([
-                        Repeater::make('identifiers')
-                            ->relationship('identifiers')
-                            ->schema([
-                                static::identifiersSection(),
-                            ])
-                            ->deletable(false),
-                    ]),
 
             ])
                 ->skippable()
@@ -139,7 +126,6 @@ class PatientForm
                 Grid::make(3)->schema([
                     DateTimePicker::make('date_of_birth')
                         ->label('Date of Birth')
-                        ->required()
                         ->native(false)
                         ->displayFormat('d M Y')
                         ->maxDate(now())
@@ -182,6 +168,18 @@ class PatientForm
                     ->default(false)
                     ->columnSpanFull(),
             ]);
+    }
+
+    public static function insuranceSection(): Section
+    {
+        $fields = [];
+        if (class_exists(PatientInsuranceSchema::class) && config('insurance.enabled', true)) {
+            $fields = array_merge($fields, PatientInsuranceSchema::getFields());
+        }
+        return Section::make('Insurance Information')
+            ->description("Insurance information")
+            ->columnSpanFull()
+            ->schema($fields);
     }
 
     public static function contactSection(): Section
@@ -322,7 +320,7 @@ class PatientForm
                 Toggle::make('can_make_medical_decisions')
                     ->label('Can make medical decisions')
                     ->helperText('This person has authority to make medical decisions on behalf of the patient')
-                    ->default(false),
+                    ->default(true),
             ]);
     }
 
@@ -350,8 +348,9 @@ class PatientForm
                 ]),
 
                 Grid::make(3)->schema([
-                    Select::make('.issuer')
+                    Select::make('issuer')
                         ->label('Issuing Authority')
+                        ->default('NIA')
                         ->options([
                             'NHIA' => 'National Health Insurance Authority',
                             'GRA' => 'Ghana Revenue Authority',
