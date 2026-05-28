@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager;
+use Modules\Billing\Filament\RelationManagers\PatientPaymentsRelationManager;
 use Modules\Core\Enums\NavigationGroup;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
@@ -89,6 +90,10 @@ class PatientResource extends Resource
 
         if (class_exists(PatientInvoicesRelationManager::class)) {
             $relations[] = PatientInvoicesRelationManager::class;
+        }
+
+        if (class_exists(PatientPaymentsRelationManager::class)) {
+            $relations[] = PatientPaymentsRelationManager::class;
         }
 
         return $relations;
