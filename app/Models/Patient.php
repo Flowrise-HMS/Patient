@@ -121,6 +121,16 @@ class Patient extends BaseModel implements HasMedia
         return $this->hasMany(Allergy::class, 'patient_id');
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(\Modules\Billing\Models\Invoice::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(\Modules\Billing\Models\Payment::class);
+    }
+
     public function currentSchool(): HasMany
     {
         return $this->hasMany(PatientSchool::class)->where('is_current', true);

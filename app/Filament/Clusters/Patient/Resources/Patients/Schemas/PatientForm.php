@@ -58,7 +58,8 @@ class PatientForm
                             ->schema([
                                 static::identifiersSection(),
                             ])
-                            ->deletable(false),
+                            ->defaultItems(0)
+                            ->deletable(true),
                         static::insuranceSection(),
                         static::additionalSection(),
                     ]),
@@ -74,7 +75,7 @@ class PatientForm
                             ->schema([
                                 static::emergencyContactSection(),
                             ])
-                            ->defaultItems(1)
+                            ->defaultItems(0)
                             ->deletable(false),
                     ]),
 
