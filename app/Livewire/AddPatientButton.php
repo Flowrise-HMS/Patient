@@ -40,6 +40,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
             ->modalHeading('Quick Patient Registration')
             ->modalDescription('Fast registration for emergency cases')
             ->icon('heroicon-o-user-plus')
+            ->closeModalByClickingAway(false)
             ->authorize(Gate::allows('create', Patient::class))
             ->schema([
                 ...PatientForm::getSteps(),
