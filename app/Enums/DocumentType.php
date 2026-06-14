@@ -65,11 +65,8 @@ enum DocumentType: string implements HasColor, HasDescription, HasLabel
         };
     }
 
-    /**
-     * @deprecated Use {@see self::getLabel()} for Filament-aware labels.
-     */
-    public function label(): string
+    public static function values(): array
     {
-        return (string) $this->getLabel();
+        return array_column(self::cases(), 'value');
     }
 }

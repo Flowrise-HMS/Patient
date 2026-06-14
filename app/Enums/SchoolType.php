@@ -73,23 +73,6 @@ enum SchoolType: string implements HasColor, HasDescription, HasLabel
         return array_column(self::cases(), 'value');
     }
 
-    public static function options(): array
-    {
-        return [
-            self::NURSERY->value => 'Nursery School',
-            self::CRECHE->value => 'Creche/Daycare',
-            self::KINDERGARTEN->value => 'Kindergarten',
-            self::PRIMARY->value => 'Primary School',
-            self::JUNIOR_HIGH->value => 'Junior High School (JHS)',
-            self::SENIOR_HIGH->value => 'Senior High School (SHS)',
-            self::VOCATIONAL->value => 'Vocational/Technical School',
-            self::TERTIARY->value => 'Tertiary College',
-            self::UNIVERSITY->value => 'University',
-            self::PROFESSIONAL->value => 'Professional Institute',
-            self::OTHER->value => 'Other',
-        ];
-    }
-
     public function getClassLevels(): array
     {
         return match ($this) {
