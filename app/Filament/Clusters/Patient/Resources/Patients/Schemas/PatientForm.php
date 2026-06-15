@@ -62,6 +62,7 @@ class PatientForm
                             ->deletable(true),
                         static::insuranceSection(),
                         static::additionalSection(),
+                        static::schoolSection(),
                     ]),
 
                 Step::make('Contact')
@@ -78,7 +79,6 @@ class PatientForm
                             ->defaultItems(0)
                             ->deletable(false),
                     ]),
-
 
             ])
                 ->skippable()
@@ -177,8 +177,9 @@ class PatientForm
         if (class_exists(PatientInsuranceSchema::class) && config('insurance.enabled', true)) {
             $fields = array_merge($fields, PatientInsuranceSchema::getFields());
         }
+
         return Section::make('Insurance Information')
-            ->description("Insurance information")
+            ->description('Insurance information')
             ->columnSpanFull()
             ->schema($fields);
     }
@@ -282,6 +283,32 @@ class PatientForm
                     ->live()
                     ->preload()
                     ->searchable(),
+
+                Toggle::make('is_student')
+                    ->label('Is this a student?')
+                    ->helperText('Enable to record school/enrollment information')
+                    ->live()
+                    ->default(fn (?Patient $record) => $record?->exists && $record->schools()->exists())
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function schoolSection(): Section
+    {
+        return Section::make('School Information')
+            ->description('Current school enrollment details')
+            ->visible(fn (Get $get): bool => (bool) $get('is_student'))
+            ->collapsible()
+            ->columns(2)
+            ->columnSpanFull()
+            ->schema([
+                Repeater::make('schools')
+                    ->relationship('schools')
+                    ->maxItems(1)
+                    ->defaultItems(1)
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->schema(PatientSchoolFormSchema::getFields()),
             ]);
     }
 

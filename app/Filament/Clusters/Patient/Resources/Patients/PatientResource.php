@@ -21,6 +21,7 @@ use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatie
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatients;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ViewPatient;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\AllergiesRelationManager;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\SchoolsRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientInfolist;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Tables\PatientsTable;
@@ -71,6 +72,7 @@ class PatientResource extends Resource
     {
         $relations = [
             AllergiesRelationManager::class,
+            SchoolsRelationManager::class,
         ];
 
         $clinicalRelations = [

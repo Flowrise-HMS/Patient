@@ -48,6 +48,8 @@ class PatientInfolist
                             ])
                             ->columns(4),
                     ]),
+
+                PatientSchoolInfolist::getCurrentSchoolSection(),
             ]);
     }
 
