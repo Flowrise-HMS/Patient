@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Classes\Services\PatientSchoolService;
 use Modules\Patient\Models\Patient;
 use Modules\Patient\Models\PatientSchool;
@@ -10,13 +10,14 @@ use Tests\TestCase;
 
 class PatientSchoolServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected PatientSchoolService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->migrateModules(['Core', 'Patient']);
 
         $this->service = new PatientSchoolService;
     }

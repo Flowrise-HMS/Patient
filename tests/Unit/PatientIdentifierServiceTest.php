@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Classes\Services\PatientIdentifierService;
 use Modules\Patient\Enums\IdentifierType;
 use Modules\Patient\Models\Patient;
@@ -11,13 +11,14 @@ use Tests\TestCase;
 
 class PatientIdentifierServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected PatientIdentifierService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->migrateModules(['Core', 'Patient']);
 
         $this->service = new PatientIdentifierService;
     }

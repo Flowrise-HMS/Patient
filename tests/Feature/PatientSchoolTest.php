@@ -2,20 +2,19 @@
 
 namespace Modules\Patient\Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Models\Patient;
 use Modules\Patient\Models\PatientSchool;
 use Tests\TestCase;
 
 class PatientSchoolTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->artisan('module:migrate', ['module' => 'Core', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Patient', '--force' => true]);
+        $this->migrateModules(['Core', 'Patient']);
     }
 
     public function test_patient_has_schools_relationship(): void
@@ -85,8 +84,10 @@ class PatientSchoolTest extends TestCase
     {
         $school = PatientSchool::factory()->make([
             'school_name' => 'Some School',
+            'school_type' => \Modules\Patient\Enums\SchoolType::PRIMARY->value,
             'level' => null,
             'class_name' => null,
+            'course' => null,
         ]);
 
         $this->assertEquals('Some School', $school->display_name);

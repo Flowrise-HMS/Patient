@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Classes\Services\EmergencyContactService;
 use Modules\Patient\Enums\RelationshipType;
 use Modules\Patient\Models\EmergencyContact;
@@ -11,13 +11,14 @@ use Tests\TestCase;
 
 class EmergencyContactServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected EmergencyContactService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->migrateModules(['Core', 'Patient']);
 
         $this->service = new EmergencyContactService;
     }

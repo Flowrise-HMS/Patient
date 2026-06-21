@@ -4,7 +4,7 @@ namespace Modules\Patient\Tests\Unit;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Classes\Services\EmergencyContactService;
 use Modules\Patient\Classes\Services\PatientIdentifierService;
 use Modules\Patient\Classes\Services\PatientSchoolService;
@@ -17,13 +17,14 @@ use Tests\TestCase;
 
 class PatientServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected PatientService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->migrateModules(['Core', 'Patient']);
 
         $this->service = new PatientService(
             new PatientIdentifierService,

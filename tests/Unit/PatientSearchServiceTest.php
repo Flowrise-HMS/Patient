@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Models\Patient;
@@ -11,13 +11,14 @@ use Tests\TestCase;
 
 class PatientSearchServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected PatientSearchService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->migrateModules(['Core', 'Patient']);
 
         $this->service = new PatientSearchService;
     }

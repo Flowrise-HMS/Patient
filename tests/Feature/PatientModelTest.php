@@ -2,7 +2,7 @@
 
 namespace Modules\Patient\Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Core\Models\Branch;
 use Modules\Patient\Models\EmergencyContact;
 use Modules\Patient\Models\Patient;
@@ -11,13 +11,12 @@ use Tests\TestCase;
 
 class PatientModelTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->artisan('module:migrate', ['module' => 'Core', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Patient', '--force' => true]);
+        $this->migrateModules(['Core', 'Patient']);
     }
 
     public function test_patient_factory_creates_patient(): void
