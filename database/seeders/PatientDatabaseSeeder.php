@@ -13,6 +13,7 @@ class PatientDatabaseSeeder extends Seeder
     {
         $this->call([
             PatientCustomPermissionSeeder::class,
+            PatientShieldPermissionsSeeder::class,
         ]);
     }
 }

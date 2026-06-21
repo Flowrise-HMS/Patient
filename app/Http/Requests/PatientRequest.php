@@ -48,6 +48,7 @@ class PatientRequest extends FormRequest
             'address' => ['nullable', 'array'],
             'address.street' => ['nullable', 'string', 'max:255'],
             'address.city' => ['nullable', 'string', 'max:100'],
+            'address.district' => ['nullable', 'string', 'max:100'],
             'address.region' => ['nullable', 'string', 'max:100'],
             'address.country' => ['nullable', 'string', 'max:100'],
             'address.postal_code' => ['nullable', 'string', 'max:20'],

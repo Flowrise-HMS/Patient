@@ -92,7 +92,6 @@ class SchoolsRelationManager extends RelationManager
                     ->date(),
             ])
             ->filters([
-                TrashedFilter::make(),
                 SelectFilter::make('school_type')
                     ->label('School Type')
                     ->options(SchoolType::class),
@@ -104,7 +103,7 @@ class SchoolsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['is_current'] ??= false;
 
                         return $data;
@@ -141,10 +140,6 @@ class SchoolsRelationManager extends RelationManager
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-            ])
-            ->modifyQueryUsing(fn (Builder $query) => $query
-                ->withoutGlobalScopes([
-                    SoftDeletingScope::class,
-                ]));
+            ]);
     }
 }

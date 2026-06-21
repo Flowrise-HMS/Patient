@@ -132,4 +132,29 @@ class PatientFactory extends Factory
             'user_id' => $userId,
         ]);
     }
+
+    /**
+     * @param  array<string, string|null>|null  $address
+     */
+    public function withAddress(?array $address = null): static
+    {
+        $regions = [
+            'Greater Accra',
+            'Ashanti',
+            'Western',
+            'Eastern',
+            'Central',
+            'Northern',
+        ];
+
+        return $this->state(fn (array $attributes) => [
+            'address' => $address ?? [
+                'street' => fake()->streetAddress(),
+                'city' => fake()->city(),
+                'district' => fake()->city(),
+                'region' => fake()->randomElement($regions),
+                'country' => config('core.default_country_code', 'GH'),
+            ],
+        ]);
+    }
 }

@@ -219,14 +219,14 @@ class PatientForm
             ->description('Patient residential address')
             ->collapsed()
             ->schema([
-                TextInput::make('street')
+                TextInput::make('address.street')
                     ->label('Street Address')
                     ->placeholder('House number, street name')
                     ->columnSpanFull(),
                 Grid::make()
                     ->columns(3)
                     ->schema([
-                        TextInput::make('city')
+                        TextInput::make('address.city')
                             ->label('City/Town')
                             ->placeholder('e.g., Accra')
                             ->dataList(fn (Get $get) => City::where('country_code', config('core.default_country_code', 'GH'))
@@ -234,18 +234,24 @@ class PatientForm
                                 ->toArray()
                             ),
 
-                        TextInput::make('district')
+                        TextInput::make('address.district')
                             ->label('District')
                             ->placeholder('e.g., Kumasi')
                             ->columnSpan(1),
 
-                        Select::make('region')
+                        Select::make('address.region')
                             ->label('Region')
                             ->options(fn (Get $get) => State::where('country_code', config('core.default_country_code', 'GH'))
                                 ->pluck('name')->toArray())
                             ->searchable()
                             ->columnSpan(1),
                     ]),
+                Select::make('address.country')
+                    ->label('Country')
+                    ->default(config('core.default_country_code', 'GH'))
+                    ->options(Country::pluck('name', 'iso2')?->toArray() ?? [])
+                    ->searchable()
+                    ->columnSpanFull(),
             ]);
     }
 
