@@ -9,6 +9,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
+use Modules\Core\Filament\Infolists\Components\CurrencyEntry;
 
 class PatientInfolist
 {
@@ -66,12 +67,15 @@ class PatientInfolist
             Section::make('Account')
                 ->visible(fn (): bool => Auth::user()?->can('view_patient_balance') ?? false)
                 ->schema([
-                    TextEntry::make('pending_balance')
+                    CurrencyEntry::make('pending_balance')
                         ->label('Outstanding balance')
                         ->state(fn ($record): string => app(PatientBalanceQueryService::class)->openBalanceForPatient((string) $record->id))
                         ->badge()
-                        ->color(fn (string $state): string => bccomp($state, '0', 2) > 0 ? 'danger' : 'gray')
-                        ->formatStateUsing(fn (string $state): string => 'GHS '.number_format((float) $state, 2)),
+                        ->color(fn ($record): string => bccomp(
+                            app(PatientBalanceQueryService::class)->openBalanceForPatient((string) $record->id),
+                            '0',
+                            2
+                        ) > 0 ? 'danger' : 'gray'),
                 ]),
         ];
     }
