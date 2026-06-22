@@ -4,10 +4,11 @@
 
 @section('content')
     <div class="id-card">
-        <div class="id-card__banner id-card__banner--patient">
-            <span class="id-card__banner-title">{{ config('app.name') }}</span>
-            <span class="id-card__banner-label">{{ __('PATIENT CARD') }}</span>
-        </div>
+        @include('core::print.partials.id-card-banner', [
+            'branchId' => $patient->branch_id,
+            'variant' => 'patient',
+            'label' => __('PATIENT CARD'),
+        ])
 
         <div class="id-card__body">
             <div class="id-card__photo-col">
