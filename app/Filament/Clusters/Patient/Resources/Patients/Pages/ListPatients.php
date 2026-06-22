@@ -18,7 +18,7 @@ class ListPatients extends ListRecords
         return [
             ImportAction::make()
                 ->importer(PatientImporter::class)
-                ->visible(fn() => Auth::user()?->can('import_patients'))
+                ->visible(fn () => Auth::user()?->can('import_patients'))
                 ->color('info'),
             CreateAction::make(),
         ];

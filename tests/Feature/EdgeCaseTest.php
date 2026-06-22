@@ -3,6 +3,7 @@
 namespace Modules\Patient\Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Modules\Core\Enums\Title;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\DocumentType;
 use Modules\Patient\Enums\EducationLevel;
@@ -45,7 +46,7 @@ class EdgeCaseTest extends TestCase
     public function test_patient_full_name_with_title(): void
     {
         $patient = Patient::factory()->create([
-            'title' => \Modules\Core\Enums\Title::MR,
+            'title' => Title::MR,
             'first_name' => 'John',
             'last_name' => 'Doe',
         ]);

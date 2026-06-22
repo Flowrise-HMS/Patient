@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Modules\Appointment\Models\Appointment;
+use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\Payment;
 use Modules\Clinical\Enums\EncounterStatus;
 use Modules\Clinical\Models\Allergy;
 use Modules\Clinical\Models\Encounter;
@@ -123,12 +125,12 @@ class Patient extends BaseModel implements HasMedia
 
     public function invoices(): HasMany
     {
-        return $this->hasMany(\Modules\Billing\Models\Invoice::class);
+        return $this->hasMany(Invoice::class);
     }
 
     public function payments(): HasMany
     {
-        return $this->hasMany(\Modules\Billing\Models\Payment::class);
+        return $this->hasMany(Payment::class);
     }
 
     public function currentSchool(): HasMany
@@ -164,6 +166,7 @@ class Patient extends BaseModel implements HasMedia
     {
         $fullname = $this->getFullNameAttribute();
         $mrn = $this->mrn;
+
         return "$fullname ($mrn)";
     }
 

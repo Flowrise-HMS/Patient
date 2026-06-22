@@ -5,7 +5,7 @@ namespace Modules\Patient\Livewire;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Checkbox;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -13,11 +13,12 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Modules\Clinical\Filament\Clusters\Workspace\Pages\PatientProfile;
 use Modules\Core\Classes\Services\BranchService;
 use Modules\Insurance\Services\PatientInsuranceService;
-use Modules\Patient\Classes\Services\PatientService;
+use Modules\Patient\Events\PatientRegistered;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Models\Patient;
 
@@ -32,7 +33,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
 
     public function addPatientAction(): Action
     {
-        return \Filament\Actions\CreateAction::make('addPatient')
+        return CreateAction::make('addPatient')
             ->model(Patient::class)
             ->color('info')
             ->slideOver()
@@ -54,6 +55,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                 if (function_exists('generate_global_uuid')) {
                     $data['global_uuid'] = generate_global_uuid();
                 }
+
                 return $data;
             })
             ->after(function (Patient $record, array $data): void {
@@ -61,11 +63,11 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                     app(PatientInsuranceService::class)->createPolicyFromData($record->id, $data);
                 }
 
-                if (class_exists(\Modules\Patient\Events\PatientRegistered::class)) {
-                    event(new \Modules\Patient\Events\PatientRegistered($record));
+                if (class_exists(PatientRegistered::class)) {
+                    event(new PatientRegistered($record));
                 }
 
-                \Illuminate\Support\Facades\Log::info('Patient registered via quick add', [
+                Log::info('Patient registered via quick add', [
                     'patient_id' => $record->id,
                     'mrn' => $record->mrn,
                     'branch_id' => $record->branch_id,

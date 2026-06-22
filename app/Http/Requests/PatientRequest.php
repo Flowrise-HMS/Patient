@@ -4,11 +4,11 @@ namespace Modules\Patient\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Core\Enums\Title;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\EducationLevel;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\MaritalStatus;
-use Modules\Core\Enums\Title;
 
 class PatientRequest extends FormRequest
 {

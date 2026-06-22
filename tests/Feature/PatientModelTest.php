@@ -3,7 +3,6 @@
 namespace Modules\Patient\Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Modules\Core\Models\Branch;
 use Modules\Patient\Models\EmergencyContact;
 use Modules\Patient\Models\Patient;
 use Modules\Patient\Models\PatientIdentifier;

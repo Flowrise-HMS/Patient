@@ -3,6 +3,7 @@
 namespace Modules\Patient\Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Modules\Patient\Enums\SchoolType;
 use Modules\Patient\Models\Patient;
 use Modules\Patient\Models\PatientSchool;
 use Tests\TestCase;
@@ -84,7 +85,7 @@ class PatientSchoolTest extends TestCase
     {
         $school = PatientSchool::factory()->make([
             'school_name' => 'Some School',
-            'school_type' => \Modules\Patient\Enums\SchoolType::PRIMARY->value,
+            'school_type' => SchoolType::PRIMARY->value,
             'level' => null,
             'class_name' => null,
             'course' => null,

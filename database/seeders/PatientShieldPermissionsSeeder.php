@@ -2,6 +2,7 @@
 
 namespace Modules\Patient\Database\Seeders;
 
+use Database\Seeders\ShieldSeeder;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -11,7 +12,7 @@ class PatientShieldPermissionsSeeder extends Seeder
 {
     /**
      * Grant Filament Shield widget permissions for Patient dashboard analytics.
-     * Run after {@see \Database\Seeders\ShieldSeeder} so permissions exist.
+     * Run after {@see ShieldSeeder} so permissions exist.
      */
     public function run(): void
     {

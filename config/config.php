@@ -6,6 +6,6 @@ return [
         'print_hospital_card' => 'Print Hospital Card',
         'discharge_patient' => 'Discharge Patient',
         'view_patient_balance' => 'View Patient Balance',
-        'import_patients' => 'Import Patients'
+        'import_patients' => 'Import Patients',
     ],
 ];
