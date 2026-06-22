@@ -9,7 +9,7 @@ Before anyone can document a visit, order a test, or schedule an appointment, th
 ## Where Patient fits in FlowRise
 
 - **Depends on Core** for organization and branch context (where the patient is registered) and shared platform services.
-- **Clinical, Appointment, and future billing** features all assume a `Patient` record exists when they record encounters, bookings, or charges.
+- **Clinical, Appointment, Billing, and Insurance** features all assume a `Patient` record exists when they record encounters, bookings, charges, or policies.
 
 ```mermaid
 flowchart LR
@@ -17,9 +17,13 @@ flowchart LR
   Patient[Patient]
   Clinical[Clinical]
   Appointment[Appointment]
+  Billing[Billing]
+  Insurance[Insurance]
   Core --> Patient
   Patient --> Clinical
   Patient --> Appointment
+  Patient --> Billing
+  Patient --> Insurance
 ```
 
 ## What you can do with it (everyday language)
