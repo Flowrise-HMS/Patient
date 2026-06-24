@@ -76,6 +76,15 @@ class PatientInfolist
                             '0',
                             2
                         ) > 0 ? 'danger' : 'gray'),
+                    CurrencyEntry::make('deposit_balance')
+                        ->label('Deposit balance')
+                        ->state(fn ($record): string => app(PatientBalanceQueryService::class)->depositBalanceForPatient((string) $record->id))
+                        ->badge()
+                        ->color(fn ($record): string => bccomp(
+                            app(PatientBalanceQueryService::class)->depositBalanceForPatient((string) $record->id),
+                            '0',
+                            2
+                        ) > 0 ? 'success' : 'gray'),
                 ]),
         ];
     }
