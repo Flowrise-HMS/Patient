@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Modules\Appointment\Models\Appointment;
@@ -96,13 +97,13 @@ class Patient extends BaseModel implements HasMedia
         return $this->hasMany(Appointment::class, 'patient_id');
     }
 
-    public function latestEncounter()
+    public function latestEncounter(): HasOne
     {
         return $this->hasOne(Encounter::class, 'patient_id')
             ->orderByDesc('created_at');
     }
 
-    public function activeEncounter()
+    public function activeEncounter(): HasOne
     {
         return $this->hasOne(Encounter::class, 'patient_id')
             ->whereNotIn('status', [
@@ -112,7 +113,7 @@ class Patient extends BaseModel implements HasMedia
             ->orderByDesc('created_at');
     }
 
-    public function latestVitals()
+    public function latestVitals(): HasOne
     {
         return $this->hasOne(VitalSign::class, 'patient_id')
             ->latestOfMany('recorded_at');

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Patient\Database\Factories\PatientIdentifierFactory;
 
 class PatientIdentifier extends Model
@@ -34,12 +35,12 @@ class PatientIdentifier extends Model
         return PatientIdentifierFactory::new();
     }
 
-    public function patient()
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class, 'patient_id');
     }
 
-    public function verifiedBy()
+    public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
