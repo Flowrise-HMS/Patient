@@ -24,6 +24,7 @@ use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Traits\HasAddress;
 use Modules\Core\Traits\HasContact;
+use Modules\Insurance\Models\PatientPolicy;
 use Modules\Patient\Database\Factories\PatientFactory;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\EducationLevel;
@@ -95,6 +96,11 @@ class Patient extends BaseModel implements HasMedia
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'patient_id');
+    }
+
+    public function insurancePolicies()
+    {
+        return $this->hasMany(PatientPolicy::class);
     }
 
     public function latestEncounter(): HasOne
