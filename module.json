@@ -18,6 +18,7 @@
     ],
     "files": [],
     "requires": [
-        "Modules\\Core"
+        "Modules\\Core",
+        "Modules\\FHIR"
     ]
 }
