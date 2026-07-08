@@ -9,4 +9,6 @@ use Filament\Support\Icons\Heroicon;
 class PatientCluster extends Cluster
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
+
+    protected static bool $shouldRegisterSubNavigation = false;
 }

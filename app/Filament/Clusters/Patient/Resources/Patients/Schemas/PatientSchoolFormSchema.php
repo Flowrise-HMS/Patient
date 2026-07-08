@@ -24,7 +24,7 @@ class PatientSchoolFormSchema
                     ->options(SchoolType::class)
                     ->searchable()
                     ->live()
-                    ->afterStateUpdated(function (Set $set, ?string $state) {
+                    ->afterStateUpdated(function (Set $set, SchoolType|string|null $state) {
                         $set('level', null);
                         $set('hostel', null);
                         $set('hostel_room', null);
@@ -126,28 +126,33 @@ class PatientSchoolFormSchema
         ];
     }
 
-    protected static function getLevelOptions(?string $schoolType): array
+    protected static function normalizeSchoolType(SchoolType|string|null $schoolType): ?SchoolType
     {
-        if (! $schoolType) {
-            return [];
+        if ($schoolType instanceof SchoolType) {
+            return $schoolType;
         }
 
-        $type = SchoolType::tryFrom($schoolType);
+        if ($schoolType === null || $schoolType === '') {
+            return null;
+        }
+
+        return SchoolType::tryFrom($schoolType);
+    }
+
+    protected static function getLevelOptions(SchoolType|string|null $schoolType): array
+    {
+        $type = self::normalizeSchoolType($schoolType);
 
         return $type ? array_combine($type->getClassLevels(), $type->getClassLevels()) : [];
     }
 
-    protected static function requiresHostel(?string $schoolType): bool
+    protected static function requiresHostel(SchoolType|string|null $schoolType): bool
     {
-        $type = SchoolType::tryFrom($schoolType);
-
-        return $type?->requiresHostel() ?? false;
+        return self::normalizeSchoolType($schoolType)?->requiresHostel() ?? false;
     }
 
-    protected static function requiresCourse(?string $schoolType): bool
+    protected static function requiresCourse(SchoolType|string|null $schoolType): bool
     {
-        $type = SchoolType::tryFrom($schoolType);
-
-        return $type?->requiresCourse() ?? false;
+        return self::normalizeSchoolType($schoolType)?->requiresCourse() ?? false;
     }
 }
