@@ -441,7 +441,7 @@ class FhirPatientTransformer implements FhirResourceContract
 
             $given = $contact['name']['given'] ?? [];
             $family = $contact['name']['family'] ?? '';
-            $fullName = trim(($given[0] ?? '') . ' ' . $family);
+            $fullName = trim(($given[0] ?? '').' '.$family);
 
             $entry = [
                 'name' => $fullName,

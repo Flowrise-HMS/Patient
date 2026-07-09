@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Modules\Core\Enums\Title;
 use Modules\FHIR\Contracts\FhirResourceContract;
 use Modules\Patient\Classes\Fhir\FhirPatientTransformer;
-use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\IdentifierType;
 use Modules\Patient\Enums\MaritalStatus;
