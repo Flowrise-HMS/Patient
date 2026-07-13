@@ -60,7 +60,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
             })
             ->after(function (Patient $record, array $data): void {
                 if (config('insurance.enabled', true) && app()->bound(PatientInsuranceService::class)) {
-                    app(PatientInsuranceService::class)->createPolicyFromData($record->id, $data);
+                    app(PatientInsuranceService::class)->syncFromFormData($record->id, $data);
                 }
 
                 if (class_exists(PatientRegistered::class)) {

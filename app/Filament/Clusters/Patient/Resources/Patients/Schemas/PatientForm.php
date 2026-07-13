@@ -386,11 +386,10 @@ class PatientForm
                         ->label('Issuing Authority')
                         ->default('NIA')
                         ->options([
-                            'NHIA' => 'National Health Insurance Authority',
+                            'NIA' => 'National Identification Authority',
                             'GRA' => 'Ghana Revenue Authority',
                             'EC' => 'Electoral Commission',
                             'DVLA' => 'Driver and Vehicle Licensing Authority',
-                            'NIA' => 'National Identification Authority',
                             'other' => 'Other',
                         ]),
 

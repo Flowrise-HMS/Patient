@@ -10,7 +10,6 @@ use Illuminate\Contracts\Support\Htmlable;
 enum IdentifierType: string implements HasColor, HasDescription, HasLabel
 {
     case MRN = 'mrn';
-    case NHIS = 'nhis';
     case NATIONAL_ID = 'national_id';
     case PASSPORT = 'passport';
     case DRIVER_LICENSE = 'driver_license';
@@ -24,7 +23,6 @@ enum IdentifierType: string implements HasColor, HasDescription, HasLabel
     {
         return match ($this) {
             self::MRN => 'Medical Record Number (MRN)',
-            self::NHIS => 'NHIS Card Number',
             self::NATIONAL_ID => 'National ID (Ghana Card)',
             self::PASSPORT => 'Passport Number',
             self::DRIVER_LICENSE => "Driver's License",
@@ -40,7 +38,6 @@ enum IdentifierType: string implements HasColor, HasDescription, HasLabel
     {
         return match ($this) {
             self::MRN => 'primary',
-            self::NHIS => 'success',
             self::NATIONAL_ID => 'info',
             self::PASSPORT => 'warning',
             self::DRIVER_LICENSE => 'gray',
@@ -56,7 +53,6 @@ enum IdentifierType: string implements HasColor, HasDescription, HasLabel
     {
         return match ($this) {
             self::MRN => 'Internal medical record number assigned by the facility.',
-            self::NHIS => 'National Health Insurance Scheme membership identifier.',
             self::NATIONAL_ID => 'National identity card number (e.g. Ghana Card).',
             self::PASSPORT => 'Machine-readable passport number.',
             self::DRIVER_LICENSE => 'Driver or road license number.',
@@ -88,7 +84,6 @@ enum IdentifierType: string implements HasColor, HasDescription, HasLabel
     public function isInsuranceRelated(): bool
     {
         return in_array($this, [
-            self::NHIS,
             self::SSNIT,
         ]);
     }
@@ -98,7 +93,6 @@ enum IdentifierType: string implements HasColor, HasDescription, HasLabel
         return in_array($this, [
             self::PASSPORT,
             self::DRIVER_LICENSE,
-            self::NHIS,
         ]);
     }
 }

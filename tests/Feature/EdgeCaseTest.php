@@ -167,12 +167,12 @@ class EdgeCaseTest extends TestCase
     public function test_identifier_type_values(): void
     {
         $values = IdentifierType::values();
-        $this->assertContains('nhis', $values);
         $this->assertContains('driver_license', $values);
         $this->assertContains('passport', $values);
         $this->assertContains('voter_id', $values);
         $this->assertContains('national_id', $values);
         $this->assertContains('mrn', $values);
+        $this->assertNotContains('nhis', $values);
     }
 
     public function test_document_type_values(): void

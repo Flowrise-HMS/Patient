@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -173,6 +174,7 @@ class PatientsTable
 
         return [
             ActionGroup::make([
+                RestoreAction::make(),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

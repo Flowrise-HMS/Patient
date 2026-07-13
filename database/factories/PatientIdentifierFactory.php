@@ -20,7 +20,7 @@ class PatientIdentifierFactory extends Factory
             'patient_id' => Patient::factory(),
             'type' => fake()->randomElement(IdentifierType::cases())->value,
             'value' => fake()->unique()->numerify('############'), // 12-digit number
-            'issuer' => fake()->randomElement(['NIA', 'NHIA', 'GRA', 'EC', 'DVLA']),
+            'issuer' => fake()->randomElement(['NIA', 'GRA', 'EC', 'DVLA']),
             'issuer_country' => 'GH',
             'is_primary' => false,
             'is_verified' => false,
@@ -52,15 +52,6 @@ class PatientIdentifierFactory extends Factory
             'type' => IdentifierType::NATIONAL_ID->value,
             'issuer' => 'NIA',
             'value' => fake()->numerify('GHA##############'), // GhanaCard format
-        ]);
-    }
-
-    public function nhis(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => IdentifierType::NHIS->value,
-            'issuer' => 'NHIA',
-            'value' => fake()->numerify('##########'),
         ]);
     }
 

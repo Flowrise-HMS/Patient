@@ -281,7 +281,7 @@ class PatientIdentifierServiceTest extends TestCase
 
         $identifiers = $this->service->bulkCreate($patient, [
             ['type' => IdentifierType::NATIONAL_ID->value, 'value' => '111111111111'],
-            ['type' => IdentifierType::NHIS->value, 'value' => '2222222222'],
+            ['type' => IdentifierType::PASSPORT->value, 'value' => 'AB1234567'],
         ]);
 
         $this->assertCount(2, $identifiers);
