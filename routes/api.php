@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Services\ApiRouteRegistrar;
+use Modules\Patient\Http\Controllers\Api\PatientController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    //
-});
+ApiRouteRegistrar::register(
+    namePrefix: 'patients',
+    routes: fn () => Route::apiResource('patients', PatientController::class)->only(['index', 'show']),
+);

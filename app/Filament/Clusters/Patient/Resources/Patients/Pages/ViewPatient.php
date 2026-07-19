@@ -2,6 +2,7 @@
 
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Clinical\Classes\Actions\PatientActions;
@@ -24,6 +25,10 @@ class ViewPatient extends ViewRecord
         $actions = app(PatientActions::class)->forPatient($this->getRecord());
 
         return [
+            Action::make('activities')
+                ->label('Activities')
+                ->icon('heroicon-o-bell-alert')
+                ->url(fn () => PatientResource::getUrl('activities', ['record' => $this->getRecord()])),
             $actions->printHospitalCardAction(),
             $actions->assignToWardAction(),
             $actions->transferInternalAction(),
