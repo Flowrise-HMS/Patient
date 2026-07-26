@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Clinical\Filament\Widgets\PatientVitalsChartWidget;
+use Modules\Core\Support\SuperAdmin;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Modules\Patient\Models\Patient;
 use Override;
@@ -26,6 +27,7 @@ class ViewPatient extends ViewRecord
 
         return [
             Action::make('activities')
+                ->visible(fn (): bool => SuperAdmin::check())
                 ->label('Activities')
                 ->icon('heroicon-o-bell-alert')
                 ->url(fn () => PatientResource::getUrl('activities', ['record' => $this->getRecord()])),

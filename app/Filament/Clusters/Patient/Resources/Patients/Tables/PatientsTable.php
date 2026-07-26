@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
+use Modules\Core\Support\SuperAdmin;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
@@ -189,6 +190,7 @@ class PatientsTable
                     ->visible(fn ($record) => ! $record->is_active)
                     ->requiresConfirmation(),
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => PatientResource::getUrl('activities', ['record' => $record])),
             ])
