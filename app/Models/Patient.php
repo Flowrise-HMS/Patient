@@ -19,6 +19,7 @@ use Modules\Billing\Models\Payment;
 use Modules\Clinical\Enums\EncounterStatus;
 use Modules\Clinical\Models\Allergy;
 use Modules\Clinical\Models\Encounter;
+use Modules\Clinical\Models\EncounterDiagnosis;
 use Modules\Clinical\Models\VitalSign;
 use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
@@ -91,6 +92,11 @@ class Patient extends BaseModel implements HasMedia
     public function encounters(): HasMany
     {
         return $this->hasMany(Encounter::class, 'patient_id');
+    }
+
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(EncounterDiagnosis::class, 'patient_id');
     }
 
     public function appointments(): HasMany

@@ -82,6 +82,7 @@ class PatientResource extends Resource
             'Modules\Clinical\Filament\RelationManagers\Patient\PatientEncountersRelationManager',
             'Modules\Clinical\Filament\RelationManagers\Patient\PatientMedicationAdministrationsRelationManager',
             'Modules\Clinical\Filament\RelationManagers\Patient\PatientTasksRelationManager',
+            'Modules\Clinical\Filament\RelationManagers\Patient\PatientDiagnosesRelationManager',
         ];
 
         foreach ($clinicalRelations as $relationClass) {
