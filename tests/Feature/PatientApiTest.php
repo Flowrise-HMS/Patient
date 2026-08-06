@@ -28,29 +28,26 @@ class PatientApiTest extends TestCase
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        Permission::create(['name' => 'ViewAny Patient', 'guard_name' => 'web']);
-        Permission::create(['name' => 'View Patient', 'guard_name' => 'web']);
+        Permission::findOrCreate('ViewAny Patient', 'web');
+        Permission::findOrCreate('View Patient', 'web');
 
-        $this->organization = Organization::create([
+        $this->organization = Organization::factory()->create([
             'name' => 'Test Org',
             'display_name' => 'Test Org',
-            'slug' => 'test-org',
             'is_active' => true,
         ]);
 
-        $this->branchA = Branch::create([
+        $this->branchA = Branch::factory()->create([
             'organization_id' => $this->organization->id,
             'name' => 'Branch A',
             'display_name' => 'Branch A',
-            'code' => 'BR-A',
             'is_active' => true,
         ]);
 
-        $this->branchB = Branch::create([
+        $this->branchB = Branch::factory()->create([
             'organization_id' => $this->organization->id,
             'name' => 'Branch B',
             'display_name' => 'Branch B',
-            'code' => 'BR-B',
             'is_active' => true,
         ]);
     }

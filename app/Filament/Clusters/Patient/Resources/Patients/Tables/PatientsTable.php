@@ -19,11 +19,14 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
 use Modules\Core\Support\SuperAdmin;
+use Modules\Insurance\Models\PatientPolicy;
+use Modules\Insurance\Services\MemberVerificationService;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
@@ -42,7 +45,14 @@ class PatientsTable
             ->paginated([10, 25, 50, 100])
             ->recordActions(static::getActions())
             ->toolbarActions(static::getBulkActions())
-            ->persistFiltersInSession();
+            ->persistFiltersInSession()
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                if (config('insurance.enabled', true) && class_exists(MemberVerificationService::class)) {
+                    $query->with(['insurancePolicies']);
+                }
+
+                return $query;
+            });
     }
 
     public static function getColumns(): array
@@ -112,7 +122,59 @@ class PatientsTable
                 ->dateTime('d M Y')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: false),
+            TextColumn::make('nhis_member_verification')
+                ->label('NHIS Member')
+                ->badge()
+                ->toggleable()
+                ->visible(fn (): bool => config('insurance.enabled', true) && class_exists(MemberVerificationService::class))
+                ->getStateUsing(function ($record): string {
+                    $policy = static::activePolicy($record);
+                    if (! $policy) {
+                        return 'No policy';
+                    }
+
+                    return app(MemberVerificationService::class)->badge($policy)['label'];
+                })
+                ->color(function ($record): string {
+                    $policy = static::activePolicy($record);
+                    if (! $policy) {
+                        return 'gray';
+                    }
+
+                    return app(MemberVerificationService::class)->badge($policy)['color'];
+                })
+                ->tooltip(function ($record): ?string {
+                    $policy = static::activePolicy($record);
+                    if (! $policy) {
+                        return null;
+                    }
+
+                    $service = app(MemberVerificationService::class);
+                    $badge = $service->badge($policy);
+                    $parts = [];
+                    if ($badge['checked_at'] !== null) {
+                        $parts[] = 'Checked '.$badge['checked_at'];
+                    }
+                    if ($badge['source'] !== null) {
+                        $parts[] = 'Source: '.$badge['source'];
+                    }
+                    $parts[] = $service->masterDataStatus()['imported']
+                        ? 'Master data imported'
+                        : 'Master data not imported';
+
+                    return implode(' • ', $parts);
+                }),
         ];
+    }
+
+    protected static function activePolicy(mixed $record): ?PatientPolicy
+    {
+        $policies = $record->insurancePolicies ?? collect();
+
+        return $policies
+            ->where('is_active', true)
+            ->sortByDesc('is_primary')
+            ->first();
     }
 
     public static function getFilters(): array

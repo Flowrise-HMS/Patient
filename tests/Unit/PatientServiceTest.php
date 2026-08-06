@@ -41,21 +41,23 @@ class PatientServiceTest extends TestCase
 
     public function test_all_returns_all_patients(): void
     {
-        Patient::factory()->count(3)->create();
+        $created = Patient::factory()->count(3)->create();
 
         $patients = $this->getService()->all();
 
-        $this->assertCount(3, $patients);
+        $this->assertCount(3, $patients->whereIn('id', $created->pluck('id')));
     }
 
     public function test_get_active_returns_only_active_patients(): void
     {
-        Patient::factory()->count(2)->create(['is_active' => true]);
-        Patient::factory()->count(3)->create(['is_active' => false]);
+        $active = Patient::factory()->count(2)->create(['is_active' => true]);
+        $inactive = Patient::factory()->count(3)->create(['is_active' => false]);
 
         $patients = $this->getService()->getActive();
 
-        $this->assertCount(2, $patients);
+        $this->assertCount(2, $patients->whereIn('id', $active->pluck('id')));
+        $this->assertCount(0, $patients->whereIn('id', $inactive->pluck('id')));
+        $this->assertTrue($patients->every(fn (Patient $patient): bool => $patient->is_active));
     }
 
     public function test_get_trashed_returns_only_deleted_patients(): void
@@ -69,7 +71,8 @@ class PatientServiceTest extends TestCase
 
         $patients = $this->getService()->getTrashed();
 
-        $this->assertCount(3, $patients);
+        $this->assertCount(3, $patients->whereIn('id', $deleted->pluck('id')));
+        $this->assertTrue($patients->every(fn (Patient $patient): bool => $patient->trashed()));
     }
 
     public function test_find_returns_patient_by_id(): void
@@ -256,17 +259,19 @@ class PatientServiceTest extends TestCase
 
     public function test_paginate_returns_paginator(): void
     {
+        $existingTotal = Patient::query()->count();
         Patient::factory()->count(20)->create();
 
         $result = $this->getService()->paginate(10);
 
         $this->assertInstanceOf(LengthAwarePaginator::class, $result);
         $this->assertEquals(10, $result->count());
-        $this->assertEquals(20, $result->total());
+        $this->assertEquals($existingTotal + 20, $result->total());
     }
 
     public function test_paginate_with_filters(): void
     {
+        $existingMales = Patient::query()->where('gender', Gender::MALE)->count();
         Patient::factory()->count(5)->create(['gender' => Gender::MALE]);
         Patient::factory()->count(3)->create(['gender' => Gender::FEMALE]);
 
@@ -274,7 +279,7 @@ class PatientServiceTest extends TestCase
             'gender' => Gender::MALE,
         ]);
 
-        $this->assertEquals(5, $result->total());
+        $this->assertEquals($existingMales + 5, $result->total());
     }
 
     public function test_search_returns_matching_patients(): void

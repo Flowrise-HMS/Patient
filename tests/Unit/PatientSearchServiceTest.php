@@ -126,10 +126,13 @@ class PatientSearchServiceTest extends TestCase
         $withId = Patient::factory()->create();
         PatientIdentifier::factory()->for($withId, 'patient')->create();
 
-        $results = $this->service->getPatientsWithoutIdentifiers(10);
+        $results = $this->service->getPatientsWithoutIdentifiers(50);
 
-        $this->assertCount(1, $results);
-        $this->assertEquals($withoutId->id, $results->first()->id);
+        $this->assertTrue($results->contains('id', $withoutId->id));
+        $this->assertFalse($results->contains('id', $withId->id));
+        $this->assertTrue($results->every(
+            fn (Patient $patient): bool => $patient->identifiers()->doesntExist()
+        ));
     }
 
     public function test_get_duplicate_candidates_finds_potential_duplicates(): void
@@ -164,29 +167,31 @@ class PatientSearchServiceTest extends TestCase
 
     public function test_apply_filters_filters_by_gender(): void
     {
-        Patient::factory()->create(['gender' => Gender::MALE]);
-        Patient::factory()->create(['gender' => Gender::FEMALE]);
+        $male = Patient::factory()->create(['gender' => Gender::MALE]);
+        $female = Patient::factory()->create(['gender' => Gender::FEMALE]);
 
         $results = $this->service->applyFilters(
-            Patient::query(),
+            Patient::query()->whereIn('id', [$male->id, $female->id]),
             ['gender' => Gender::MALE]
         )->get();
 
         $this->assertCount(1, $results);
+        $this->assertEquals($male->id, $results->first()->id);
         $this->assertEquals(Gender::MALE, $results->first()->gender);
     }
 
     public function test_apply_filters_filters_by_active_status(): void
     {
-        Patient::factory()->create(['is_active' => true]);
-        Patient::factory()->create(['is_active' => false]);
+        $active = Patient::factory()->create(['is_active' => true]);
+        $inactive = Patient::factory()->create(['is_active' => false]);
 
         $results = $this->service->applyFilters(
-            Patient::query(),
+            Patient::query()->whereIn('id', [$active->id, $inactive->id]),
             ['is_active' => true]
         )->get();
 
         $this->assertCount(1, $results);
+        $this->assertEquals($active->id, $results->first()->id);
         $this->assertTrue($results->first()->is_active);
     }
 
