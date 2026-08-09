@@ -2,17 +2,15 @@
 
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients;
 
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Modules\Billing\Filament\RelationManagers\PatientInvoicesRelationManager;
-use Modules\Billing\Filament\RelationManagers\PatientPaymentsRelationManager;
+use Modules\Core\Classes\Support\RelationManagersRegistry;
 use Modules\Core\Enums\NavigationGroup;
+use Modules\Core\Support\ModuleAvailability;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Filament\Clusters\Patient\PatientCluster;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\CreatePatient;
@@ -75,31 +73,49 @@ class PatientResource extends Resource
             SchoolsRelationManager::class,
         ];
 
-        $clinicalRelations = [
-            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\VitalSignsRelationManager',
-            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\ClinicalNotesRelationManager',
-            'Modules\Clinical\Filament\Clusters\Clinical\Resources\Encounters\RelationManagers\ServiceRequestsRelationManager',
-            'Modules\Clinical\Filament\RelationManagers\Patient\PatientEncountersRelationManager',
-            'Modules\Clinical\Filament\RelationManagers\Patient\PatientMedicationAdministrationsRelationManager',
-            'Modules\Clinical\Filament\RelationManagers\Patient\PatientTasksRelationManager',
-            'Modules\Clinical\Filament\RelationManagers\Patient\PatientDiagnosesRelationManager',
+        $optionalByModule = [
+            'Clinical' => [
+                'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\VitalSignsRelationManager',
+                'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\ClinicalNotesRelationManager',
+                'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\ServiceRequestsRelationManager',
+                'Modules\\Clinical\\Filament\\RelationManagers\\Patient\\PatientEncountersRelationManager',
+                'Modules\\Clinical\\Filament\\RelationManagers\\Patient\\PatientMedicationAdministrationsRelationManager',
+                'Modules\\Clinical\\Filament\\RelationManagers\\Patient\\PatientTasksRelationManager',
+                'Modules\\Clinical\\Filament\\RelationManagers\\Patient\\PatientDiagnosesRelationManager',
+            ],
+            'Billing' => [
+                'Modules\\Billing\\Filament\\RelationManagers\\PatientInvoicesRelationManager',
+                'Modules\\Billing\\Filament\\RelationManagers\\PatientPaymentsRelationManager',
+            ],
+            'Insurance' => [
+                'Modules\\Insurance\\Filament\\RelationManagers\\PatientPoliciesRelationManager',
+            ],
+            'Appointment' => [
+                'Modules\\Appointment\\Filament\\RelationManagers\\PatientAppointmentsRelationManager',
+            ],
         ];
 
-        foreach ($clinicalRelations as $relationClass) {
-            if (class_exists($relationClass)) {
-                $relations[] = $relationClass;
+        foreach ($optionalByModule as $module => $classes) {
+            if (! ModuleAvailability::enabled($module)) {
+                continue;
+            }
+
+            foreach ($classes as $relationClass) {
+                if (class_exists($relationClass)) {
+                    $relations[] = $relationClass;
+                }
             }
         }
 
-        if (class_exists(PatientInvoicesRelationManager::class)) {
-            $relations[] = PatientInvoicesRelationManager::class;
+        if (app()->bound(RelationManagersRegistry::class)) {
+            foreach (app(RelationManagersRegistry::class)->for(static::class) as $relationClass) {
+                if (is_string($relationClass) && $relationClass !== '' && class_exists($relationClass)) {
+                    $relations[] = $relationClass;
+                }
+            }
         }
 
-        if (class_exists(PatientPaymentsRelationManager::class)) {
-            $relations[] = PatientPaymentsRelationManager::class;
-        }
-
-        return $relations;
+        return array_values(array_unique($relations));
     }
 
     public static function getPages(): array
