@@ -15,9 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Modules\Clinical\Filament\Clusters\Workspace\Pages\PatientProfile;
 use Modules\Core\Classes\Services\BranchService;
-use Modules\Insurance\Services\PatientInsuranceService;
+use Modules\Core\Support\OptionalClass;
 use Modules\Patient\Events\PatientRegistered;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Models\Patient;
@@ -59,9 +58,15 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                 return $data;
             })
             ->after(function (Patient $record, array $data): void {
-                if (config('insurance.enabled', true) && app()->bound(PatientInsuranceService::class)) {
-                    app(PatientInsuranceService::class)->syncFromFormData($record->id, $data);
-                }
+                OptionalClass::when(
+                    'Modules\\Insurance\\Services\\PatientInsuranceService',
+                    function (string $insuranceService) use ($record, $data): void {
+                        if (app()->bound($insuranceService)) {
+                            app($insuranceService)->syncFromFormData($record->id, $data);
+                        }
+                    },
+                    'Insurance',
+                );
 
                 if (class_exists(PatientRegistered::class)) {
                     event(new PatientRegistered($record));
@@ -84,8 +89,16 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
 
                 if (! empty($data['print_card'])) {
                     $this->redirect(route('patients.hospital-card', $record));
-                } elseif (PatientProfile::canAccess()) {
-                    $this->redirect(PatientProfile::getUrl(['patient' => $record?->id]));
+                } else {
+                    OptionalClass::when(
+                        'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\PatientProfile',
+                        function (string $profilePage) use ($record): void {
+                            if ($profilePage::canAccess()) {
+                                $this->redirect($profilePage::getUrl(['patient' => $record?->id]));
+                            }
+                        },
+                        'Clinical',
+                    );
                 }
             });
     }

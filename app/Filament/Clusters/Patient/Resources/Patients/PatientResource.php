@@ -18,7 +18,6 @@ use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\EditPatie
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatientActivities;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatients;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ViewPatient;
-use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\AllergiesRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\SchoolsRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientInfolist;
@@ -69,12 +68,12 @@ class PatientResource extends Resource
     public static function getRelations(): array
     {
         $relations = [
-            AllergiesRelationManager::class,
             SchoolsRelationManager::class,
         ];
 
         $optionalByModule = [
             'Clinical' => [
+                'Modules\\Clinical\\Filament\\RelationManagers\\Patient\\PatientAllergiesRelationManager',
                 'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\VitalSignsRelationManager',
                 'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\ClinicalNotesRelationManager',
                 'Modules\\Clinical\\Filament\\Clusters\\Clinical\\Resources\\Encounters\\RelationManagers\\ServiceRequestsRelationManager',

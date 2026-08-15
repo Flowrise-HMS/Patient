@@ -4,7 +4,7 @@ namespace Modules\Patient\Classes\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Modules\Clinical\Models\EncounterDiagnosis;
+use Modules\Core\Support\OptionalClass;
 use Modules\Patient\Models\Patient;
 
 class PatientAnalyticsService
@@ -115,31 +115,37 @@ class PatientAnalyticsService
      */
     public function getTopDiagnoses(int $limit = 8, int $days = 90, ?string $branchId = null): array
     {
-        $labelExpression = match (DB::connection()->getDriverName()) {
-            'sqlite' => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
-            'pgsql' => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
-            default => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
-        };
+        return OptionalClass::when(
+            'Modules\\Clinical\\Models\\EncounterDiagnosis',
+            function (string $diagnosisClass) use ($limit, $days, $branchId): array {
+                $labelExpression = match (DB::connection()->getDriverName()) {
+                    'sqlite' => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
+                    'pgsql' => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
+                    default => "COALESCE(NULLIF(diagnosis_codes.description, ''), NULLIF(encounter_diagnoses.description, ''), encounter_diagnoses.icd_code, 'Unknown')",
+                };
 
-        $subQuery = EncounterDiagnosis::query()
-            ->join('patients', 'patients.id', '=', 'encounter_diagnoses.patient_id')
-            ->leftJoin('diagnosis_codes', 'diagnosis_codes.id', '=', 'encounter_diagnoses.diagnosis_code_id')
-            ->when($branchId, fn ($query) => $query->where('patients.branch_id', $branchId))
-            ->where('encounter_diagnoses.created_at', '>=', now()->subDays($days))
-            ->selectRaw("{$labelExpression} as diagnosis_label");
+                $subQuery = $diagnosisClass::query()
+                    ->join('patients', 'patients.id', '=', 'encounter_diagnoses.patient_id')
+                    ->leftJoin('diagnosis_codes', 'diagnosis_codes.id', '=', 'encounter_diagnoses.diagnosis_code_id')
+                    ->when($branchId, fn ($query) => $query->where('patients.branch_id', $branchId))
+                    ->where('encounter_diagnoses.created_at', '>=', now()->subDays($days))
+                    ->selectRaw("{$labelExpression} as diagnosis_label");
 
-        $rows = DB::query()
-            ->fromSub($subQuery, 'diagnosis_labels')
-            ->selectRaw('diagnosis_label, count(*) as diagnosis_count')
-            ->groupBy('diagnosis_label')
-            ->orderByDesc('diagnosis_count')
-            ->limit($limit)
-            ->get();
+                $rows = DB::query()
+                    ->fromSub($subQuery, 'diagnosis_labels')
+                    ->selectRaw('diagnosis_label, count(*) as diagnosis_count')
+                    ->groupBy('diagnosis_label')
+                    ->orderByDesc('diagnosis_count')
+                    ->limit($limit)
+                    ->get();
 
-        return [
-            'labels' => $rows->pluck('diagnosis_label')->map(fn ($label) => (string) $label)->all(),
-            'counts' => $rows->pluck('diagnosis_count')->map(fn ($count) => (int) $count)->all(),
-        ];
+                return [
+                    'labels' => $rows->pluck('diagnosis_label')->map(fn ($label) => (string) $label)->all(),
+                    'counts' => $rows->pluck('diagnosis_count')->map(fn ($count) => (int) $count)->all(),
+                ];
+            },
+            'Clinical',
+        ) ?? ['labels' => [], 'counts' => []];
     }
 
     protected function patientsQuery(?string $branchId): Builder

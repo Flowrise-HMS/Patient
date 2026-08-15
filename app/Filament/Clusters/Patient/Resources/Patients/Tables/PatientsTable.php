@@ -24,8 +24,8 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
+use Modules\Core\Support\OptionalClass;
 use Modules\Core\Support\SuperAdmin;
-use Modules\Insurance\Models\PatientPolicy;
 use Modules\Insurance\Services\MemberVerificationService;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
@@ -167,14 +167,20 @@ class PatientsTable
         ];
     }
 
-    protected static function activePolicy(mixed $record): ?PatientPolicy
+    protected static function activePolicy(mixed $record): ?object
     {
-        $policies = $record->insurancePolicies ?? collect();
+        return OptionalClass::when(
+            'Modules\\Insurance\\Models\\PatientPolicy',
+            function () use ($record): mixed {
+                $policies = $record->insurancePolicies ?? collect();
 
-        return $policies
-            ->where('is_active', true)
-            ->sortByDesc('is_primary')
-            ->first();
+                return $policies
+                    ->where('is_active', true)
+                    ->sortByDesc('is_primary')
+                    ->first();
+            },
+            'Insurance',
+        );
     }
 
     public static function getFilters(): array
