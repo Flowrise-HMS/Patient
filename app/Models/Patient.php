@@ -6,26 +6,23 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Modules\Appointment\Models\Appointment;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Payment;
-use Modules\Clinical\Enums\EncounterStatus;
 use Modules\Clinical\Models\Allergy;
 use Modules\Clinical\Models\Encounter;
-use Modules\Clinical\Models\EncounterDiagnosis;
 use Modules\Clinical\Models\VitalSign;
 use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Traits\HasAddress;
 use Modules\Core\Traits\HasContact;
-use Modules\Insurance\Models\PatientPolicy;
 use Modules\Patient\Database\Factories\PatientFactory;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\EducationLevel;
@@ -35,6 +32,30 @@ use Modules\Patient\Observers\PatientObserver;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @property-read Collection<int, Encounter> $encounters
+ * @property-read Encounter|null $latestEncounter
+ * @property-read Encounter|null $activeEncounter
+ * @property-read VitalSign|null $latestVitals
+ * @property-read Collection<int, Allergy> $allergies
+ * @property-read Collection<int, Appointment> $appointments
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, Payment> $payments
+ *
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany encounters()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany diagnoses()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany appointments()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany insurancePolicies()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne latestEncounter()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne activeEncounter()
+ * @method \Illuminate\Database\Eloquent\Relations\HasOne latestVitals()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany allergies()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany invoices()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany payments()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany serviceRequests()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany clinicalNotes()
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany vitalSigns()
+ */
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia
 {
@@ -87,63 +108,6 @@ class Patient extends BaseModel implements HasMedia
     public function schools(): HasMany
     {
         return $this->hasMany(PatientSchool::class);
-    }
-
-    public function encounters(): HasMany
-    {
-        return $this->hasMany(Encounter::class, 'patient_id');
-    }
-
-    public function diagnoses(): HasMany
-    {
-        return $this->hasMany(EncounterDiagnosis::class, 'patient_id');
-    }
-
-    public function appointments(): HasMany
-    {
-        return $this->hasMany(Appointment::class, 'patient_id');
-    }
-
-    public function insurancePolicies()
-    {
-        return $this->hasMany(PatientPolicy::class);
-    }
-
-    public function latestEncounter(): HasOne
-    {
-        return $this->hasOne(Encounter::class, 'patient_id')
-            ->orderByDesc('created_at');
-    }
-
-    public function activeEncounter(): HasOne
-    {
-        return $this->hasOne(Encounter::class, 'patient_id')
-            ->whereNotIn('status', [
-                EncounterStatus::FINISHED,
-                EncounterStatus::CANCELLED,
-            ])
-            ->orderByDesc('created_at');
-    }
-
-    public function latestVitals(): HasOne
-    {
-        return $this->hasOne(VitalSign::class, 'patient_id')
-            ->latestOfMany('recorded_at');
-    }
-
-    public function allergies(): HasMany
-    {
-        return $this->hasMany(Allergy::class, 'patient_id');
-    }
-
-    public function invoices(): HasMany
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
     }
 
     public function currentSchool(): HasMany
