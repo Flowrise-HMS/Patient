@@ -85,6 +85,7 @@ class PatientResource extends Resource
             'Billing' => [
                 'Modules\\Billing\\Filament\\RelationManagers\\PatientInvoicesRelationManager',
                 'Modules\\Billing\\Filament\\RelationManagers\\PatientPaymentsRelationManager',
+                'Modules\\Billing\\Filament\\RelationManagers\\PatientDepositsRelationManager',
             ],
             'Insurance' => [
                 'Modules\\Insurance\\Filament\\RelationManagers\\PatientPoliciesRelationManager',

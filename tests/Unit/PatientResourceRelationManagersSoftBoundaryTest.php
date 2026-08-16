@@ -26,6 +26,10 @@ class PatientResourceRelationManagersSoftBoundaryTest extends TestCase
             'Modules\\Billing\\Filament\\RelationManagers\\PatientPaymentsRelationManager',
             $relations,
         );
+        $this->assertContains(
+            'Modules\\Billing\\Filament\\RelationManagers\\PatientDepositsRelationManager',
+            $relations,
+        );
     }
 
     #[Test]
@@ -48,6 +52,10 @@ class PatientResourceRelationManagersSoftBoundaryTest extends TestCase
             );
             $this->assertNotContains(
                 'Modules\\Billing\\Filament\\RelationManagers\\PatientPaymentsRelationManager',
+                $relations,
+            );
+            $this->assertNotContains(
+                'Modules\\Billing\\Filament\\RelationManagers\\PatientDepositsRelationManager',
                 $relations,
             );
         } finally {
