@@ -4,9 +4,10 @@ namespace Modules\Patient\Classes\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
 use Modules\Patient\Models\Patient;
 
-class PatientSearchService
+class PatientSearchService implements ProvidesFilamentPatientSearch
 {
     protected array $searchableFields = [
         'mrn',
@@ -202,5 +203,52 @@ class PatientSearchService
     public function getSearchableFields(): array
     {
         return $this->searchableFields;
+    }
+
+    /**
+     * Filament table column attributes for searching through a patient relation.
+     *
+     * @return array<int, string>
+     */
+    public function getFilamentRelationSearchableAttributes(string $relation = 'patient'): array
+    {
+        $attributes = array_map(
+            fn (string $field): string => "{$relation}.{$field}",
+            $this->searchableFields,
+        );
+
+        foreach ($this->relationSearchableFields as $field) {
+            $attributes[] = "{$relation}.{$field}";
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Filament table column attributes for searching a Patient query directly.
+     *
+     * @return array<int, string>
+     */
+    public function getFilamentSearchableAttributes(): array
+    {
+        return array_merge($this->searchableFields, $this->relationSearchableFields);
+    }
+
+    public function relationAttributes(string $relation): array
+    {
+        return $this->getFilamentRelationSearchableAttributes($relation);
+    }
+
+    public function directAttributes(): array
+    {
+        return $this->getFilamentSearchableAttributes();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getRelationSearchableFields(): array
+    {
+        return $this->relationSearchableFields;
     }
 }

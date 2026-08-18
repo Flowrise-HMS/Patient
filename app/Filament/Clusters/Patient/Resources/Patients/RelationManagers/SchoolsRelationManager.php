@@ -56,8 +56,8 @@ class SchoolsRelationManager extends RelationManager
                 TextColumn::make('school_type')
                     ->label('Type')
                     ->badge()
-                    ->color(fn (string $state): string => SchoolType::tryFrom($state)?->getColor() ?? 'gray')
-                    ->formatStateUsing(fn (string $state): string => SchoolType::tryFrom($state)?->getLabel() ?? $state),
+                    ->color(fn (mixed $state): string => enum_try_from(SchoolType::class, $state)?->getColor() ?? 'gray')
+                    ->formatStateUsing(fn (mixed $state): string => enum_try_from(SchoolType::class, $state)?->getLabel() ?? (string) $state),
 
                 TextColumn::make('level')
                     ->label('Level'),

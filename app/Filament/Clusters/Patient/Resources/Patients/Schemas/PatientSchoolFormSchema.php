@@ -128,15 +128,7 @@ class PatientSchoolFormSchema
 
     protected static function normalizeSchoolType(SchoolType|string|null $schoolType): ?SchoolType
     {
-        if ($schoolType instanceof SchoolType) {
-            return $schoolType;
-        }
-
-        if ($schoolType === null || $schoolType === '') {
-            return null;
-        }
-
-        return SchoolType::tryFrom($schoolType);
+        return enum_try_from(SchoolType::class, $schoolType);
     }
 
     protected static function getLevelOptions(SchoolType|string|null $schoolType): array

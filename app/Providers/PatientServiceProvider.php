@@ -3,6 +3,8 @@
 namespace Modules\Patient\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
+use Modules\Patient\Classes\Services\PatientSearchService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class PatientServiceProvider extends ModuleServiceProvider
@@ -34,6 +36,13 @@ class PatientServiceProvider extends ModuleServiceProvider
         RouteServiceProvider::class,
         HooksServiceProvider::class,
     ];
+
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->singleton(ProvidesFilamentPatientSearch::class, PatientSearchService::class);
+    }
 
     /**
      * Define module schedules.

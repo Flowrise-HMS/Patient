@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
+use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
 use Modules\Core\Support\OptionalClass;
 use Modules\Core\Support\SuperAdmin;
@@ -71,11 +72,8 @@ class PatientsTable
                 ->color('primary')
                 ->copyable()
                 ->copyableState(fn ($state) => $state),
-            TextColumn::make('full_name')
-                ->label('Patient Name')
-                ->searchable(['first_name', 'middle_name', 'last_name'])
-                ->sortable()
-                ->formatStateUsing(fn ($record) => $record->full_name)
+            ClientIdentityColumn::make(label: 'Patient Name', patientRelation: null, withIdentifier: false)
+                ->sortable(['last_name'])
                 ->wrap(),
             TextColumn::make('gender')
                 ->label('Gender')

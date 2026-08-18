@@ -13,8 +13,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Modules\Appointment\Models\Appointment;
+use Modules\Billing\Models\Invoice;
+use Modules\Billing\Models\Payment;
+use Modules\Clinical\Models\Allergy;
+use Modules\Clinical\Models\Encounter;
+use Modules\Clinical\Models\VitalSign;
+use Modules\Core\Contracts\ProvidesClientIdentity;
 use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
+use Modules\Core\Support\ClientIdentity;
+use Modules\Core\Support\ClientIdentityResolver;
 use Modules\Core\Traits\HasAddress;
 use Modules\Core\Traits\HasContact;
 use Modules\Patient\Database\Factories\PatientFactory;
@@ -27,14 +36,14 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
- * @property-read Collection<int, \Modules\Clinical\Models\Encounter> $encounters
- * @property-read \Modules\Clinical\Models\Encounter|null $latestEncounter
- * @property-read \Modules\Clinical\Models\Encounter|null $activeEncounter
- * @property-read \Modules\Clinical\Models\VitalSign|null $latestVitals
- * @property-read Collection<int, \Modules\Clinical\Models\Allergy> $allergies
- * @property-read Collection<int, \Modules\Appointment\Models\Appointment> $appointments
- * @property-read Collection<int, \Modules\Billing\Models\Invoice> $invoices
- * @property-read Collection<int, \Modules\Billing\Models\Payment> $payments
+ * @property-read Collection<int, Encounter> $encounters
+ * @property-read Encounter|null $latestEncounter
+ * @property-read Encounter|null $activeEncounter
+ * @property-read VitalSign|null $latestVitals
+ * @property-read Collection<int, Allergy> $allergies
+ * @property-read Collection<int, Appointment> $appointments
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, Payment> $payments
  *
  * @method \Illuminate\Database\Eloquent\Relations\HasMany encounters()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany diagnoses()
@@ -51,7 +60,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method \Illuminate\Database\Eloquent\Relations\HasMany vitalSigns()
  */
 #[ObservedBy([PatientObserver::class])]
-class Patient extends BaseModel implements HasMedia
+class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
 {
     use HasAddress, HasContact, HasFactory, HasUuids, InteractsWithMedia, Notifiable, SoftDeletes;
 
@@ -104,6 +113,13 @@ class Patient extends BaseModel implements HasMedia
         return $this->hasMany(PatientSchool::class);
     }
 
+    /** @return HasMany */
+    public function relationships()
+    {
+        return $this->hasMany(PatientRelationship::class, 'subject_id')
+            ->where('subject_type', static::class);
+    }
+
     public function currentSchool(): HasMany
     {
         return $this->hasMany(PatientSchool::class)->where('is_current', true);
@@ -139,6 +155,14 @@ class Patient extends BaseModel implements HasMedia
         $mrn = $this->mrn;
 
         return "$fullname ($mrn)";
+    }
+
+    public function clientIdentity(): ClientIdentity
+    {
+        return ClientIdentityResolver::resolve(
+            patientFullName: $this->full_name,
+            patientMrn: $this->mrn,
+        );
     }
 
     public function getAgeAttribute(): ?int

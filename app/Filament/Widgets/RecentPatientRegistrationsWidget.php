@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Modules\Core\Filament\Concerns\InteractsWithWidgetShield;
+use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Modules\Patient\Models\Patient;
 
@@ -36,9 +37,7 @@ class RecentPatientRegistrationsWidget extends BaseTableWidget
             TextColumn::make('mrn')
                 ->label(__('MRN'))
                 ->placeholder('—'),
-            TextColumn::make('full_name')
-                ->label(__('Patient'))
-                ->searchable(['first_name', 'last_name', 'mrn']),
+            ClientIdentityColumn::make(label: __('Patient'), patientRelation: null, withIdentifier: false),
             TextColumn::make('gender')
                 ->label(__('Gender'))
                 ->badge(),
