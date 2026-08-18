@@ -228,4 +228,32 @@ class PatientSearchServiceTest extends TestCase
 
         $this->assertEquals('john', $normalized);
     }
+
+    public function test_filament_relation_searchable_attributes_prefix_the_relation(): void
+    {
+        $attributes = $this->service->getFilamentRelationSearchableAttributes('patient');
+
+        $this->assertContains('patient.mrn', $attributes);
+        $this->assertContains('patient.first_name', $attributes);
+        $this->assertContains('patient.identifiers.value', $attributes);
+        $this->assertNotContains('mrn', $attributes);
+    }
+
+    public function test_filament_searchable_attributes_are_unprefixed(): void
+    {
+        $attributes = $this->service->getFilamentSearchableAttributes();
+
+        $this->assertContains('mrn', $attributes);
+        $this->assertContains('first_name', $attributes);
+        $this->assertContains('identifiers.value', $attributes);
+        $this->assertNotContains('patient.mrn', $attributes);
+    }
+
+    public function test_filament_relation_searchable_attributes_support_nested_relations(): void
+    {
+        $attributes = $this->service->getFilamentRelationSearchableAttributes('serviceRequest.patient');
+
+        $this->assertContains('serviceRequest.patient.mrn', $attributes);
+        $this->assertContains('serviceRequest.patient.identifiers.value', $attributes);
+    }
 }

@@ -64,16 +64,47 @@ class PatientResourceRelationManagersSoftBoundaryTest extends TestCase
     }
 
     #[Test]
-    public function it_skips_missing_insurance_and_appointment_relation_managers(): void
+    public function it_includes_appointment_relation_manager_when_appointment_is_enabled(): void
+    {
+        $this->requireModule('Appointment');
+
+        $relations = PatientResource::getRelations();
+
+        $this->assertContains(
+            'Modules\\Appointment\\Filament\\RelationManagers\\PatientAppointmentsRelationManager',
+            $relations,
+        );
+    }
+
+    #[Test]
+    public function it_skips_appointment_relation_manager_when_appointment_is_disabled(): void
+    {
+        $this->requireModule('Appointment');
+
+        $module = Module::find('Appointment');
+        $this->assertNotNull($module);
+
+        try {
+            $module->disable();
+
+            $relations = PatientResource::getRelations();
+
+            $this->assertNotContains(
+                'Modules\\Appointment\\Filament\\RelationManagers\\PatientAppointmentsRelationManager',
+                $relations,
+            );
+        } finally {
+            $module->enable();
+        }
+    }
+
+    #[Test]
+    public function it_skips_missing_insurance_relation_manager(): void
     {
         $relations = PatientResource::getRelations();
 
         $this->assertNotContains(
             'Modules\\Insurance\\Filament\\RelationManagers\\PatientPoliciesRelationManager',
-            $relations,
-        );
-        $this->assertNotContains(
-            'Modules\\Appointment\\Filament\\RelationManagers\\PatientAppointmentsRelationManager',
             $relations,
         );
     }
