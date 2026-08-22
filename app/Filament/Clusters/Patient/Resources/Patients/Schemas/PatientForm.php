@@ -125,9 +125,9 @@ class PatientForm
                 ]),
 
                 Grid::make(3)->schema([
-                    DateTimePicker::make('date_of_birth')
+                    DatePicker::make('date_of_birth')
                         ->label('Date of Birth')
-                        ->native(false)
+                        ->native(true)
                         ->displayFormat('d M Y')
                         ->maxDate(now())
                         ->seconds(false)
@@ -402,7 +402,7 @@ class PatientForm
 
                     DateTimePicker::make('expiry_date')
                         ->label('Expiry Date')
-                        ->native(false)
+                        ->native(true)
                         ->displayFormat('d M Y')
                         ->minDate(now()),
                 ]),
@@ -427,10 +427,10 @@ class PatientForm
                     ->label('Last Name')
                     ->required(),
 
-                DateTimePicker::make('date_of_birth')
+                DatePicker::make('date_of_birth')
                     ->label('Date of Birth')
                     ->required()
-                    ->native(false)
+                    ->native(true)
                     ->displayFormat('d M Y'),
 
                 Select::make('gender')
@@ -471,7 +471,7 @@ class PatientForm
 
                     DatePicker::make('expires_at')
                         ->label('Expiry Date')
-                        ->native(false)
+                        ->native(true)
                         ->displayFormat('d M Y')
                         ->minDate(now()),
 
