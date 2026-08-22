@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->unique(
                 ['subject_type', 'subject_id', 'object_type', 'object_id', 'type'],
-                'patient_relationships_subject_object_type_unique',
+                'pat_rel_subject_object_type_unique',
             );
             $table->index(['object_type', 'object_id', 'type']);
         });
