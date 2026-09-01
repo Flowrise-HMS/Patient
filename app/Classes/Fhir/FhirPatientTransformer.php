@@ -4,13 +4,14 @@ namespace Modules\Patient\Classes\Fhir;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\FHIR\Contracts\FhirResourceContract;
+use Modules\FHIR\Contracts\FhirWritableResourceContract;
+use Modules\Patient\Classes\Services\PatientService;
 use Modules\Patient\Enums\IdentifierType;
 use Modules\Patient\Enums\MaritalStatus;
 use Modules\Patient\Enums\RelationshipType;
 use Modules\Patient\Models\Patient;
 
-class FhirPatientTransformer implements FhirResourceContract
+class FhirPatientTransformer implements FhirWritableResourceContract
 {
     protected static array $identifierSystemMap = [
         'mrn' => ['system' => 'http://hl7.org/fhir/sid/us-ssn', 'code' => 'MR'],
@@ -159,7 +160,13 @@ class FhirPatientTransformer implements FhirResourceContract
         }
 
         $result['gender'] = $fhirResource['gender'] ?? null;
-        $result['birth_date'] = $fhirResource['birthDate'] ?? null;
+
+        /*
+         * The column is `date_of_birth`. This previously emitted `birth_date`,
+         * which is not fillable on Patient, so the value was silently dropped on
+         * every write that used this mapping.
+         */
+        $result['date_of_birth'] = $fhirResource['birthDate'] ?? null;
 
         $identifiers = $this->extractIdentifiers($fhirResource['identifier'] ?? []);
         if (! empty($identifiers)) {
@@ -174,6 +181,53 @@ class FhirPatientTransformer implements FhirResourceContract
         return $result;
     }
 
+    public function createFromFhir(array $fhirResource): Model
+    {
+        return app(PatientService::class)->create($this->serviceAttributes($fhirResource));
+    }
+
+    public function updateFromFhir(Model $model, array $fhirResource): Model
+    {
+        /** @var Patient $model */
+        return app(PatientService::class)->update($model, $this->serviceAttributes($fhirResource));
+    }
+
+    /**
+     * Reshape the `fromFhir()` output into what PatientService expects.
+     *
+     * `fromFhir()` emits `_identifiers` and `_emergencyContacts` — underscore-
+     * prefixed because they are relations rather than columns on Patient, and so
+     * must not reach mass assignment. PatientService takes them as `identifiers`
+     * (a list) and `emergency_contact` (a single primary contact), so the rename
+     * and the narrowing both happen here rather than in the mapper, which stays a
+     * pure FHIR-to-domain translation.
+     *
+     * @param  array<string, mixed>  $fhirResource
+     * @return array<string, mixed>
+     */
+    private function serviceAttributes(array $fhirResource): array
+    {
+        $attributes = $this->fromFhir($fhirResource);
+
+        $identifiers = $attributes['_identifiers'] ?? [];
+        $emergencyContacts = $attributes['_emergencyContacts'] ?? [];
+
+        unset($attributes['_identifiers'], $attributes['_emergencyContacts']);
+
+        if ($identifiers !== []) {
+            $attributes['identifiers'] = $identifiers;
+        }
+
+        if ($emergencyContacts !== []) {
+            $attributes['emergency_contact'] = $emergencyContacts[0];
+        }
+
+        return array_filter(
+            $attributes,
+            static fn (mixed $value): bool => $value !== null,
+        );
+    }
+
     public function findById(string $id): ?Model
     {
         return Patient::withTrashed()->find($id);
@@ -181,7 +235,12 @@ class FhirPatientTransformer implements FhirResourceContract
 
     public function query(): Builder
     {
-        return Patient::query();
+        /*
+         * toFhir() reads `identifiers` and `emergencyContacts` behind
+         * relationLoaded() guards, so without eager loading a bulk export emits
+         * every patient with neither — silently incomplete rather than slow.
+         */
+        return Patient::query()->with(['identifiers', 'emergencyContacts']);
     }
 
     public function searchableParameters(): array

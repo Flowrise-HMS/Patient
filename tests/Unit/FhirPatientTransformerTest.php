@@ -287,7 +287,10 @@ test('fromFhir extracts attributes correctly', function () use ($transformer) {
     expect($attrs)->toHaveKey('middle_name', 'M');
     expect($attrs)->toHaveKey('last_name', 'Doe');
     expect($attrs)->toHaveKey('gender', 'male');
-    expect($attrs)->toHaveKey('birth_date', '1990-01-15');
+    // Must be `date_of_birth`: that is the fillable column. This asserted
+    // `birth_date` until the write path was wired up and the value proved to be
+    // silently discarded by mass assignment.
+    expect($attrs)->toHaveKey('date_of_birth', '1990-01-15');
     expect($attrs)->toHaveKey('_identifiers');
     expect($attrs)->toHaveKey('_emergencyContacts');
 });
