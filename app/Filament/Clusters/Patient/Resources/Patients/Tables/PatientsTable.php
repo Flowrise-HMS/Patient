@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
+use Modules\Core\Classes\Support\TableBulkActionsRegistry;
 use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
 use Modules\Core\Support\OptionalClass;
@@ -274,12 +275,16 @@ class PatientsTable
                 DeleteBulkAction::make(),
                 ForceDeleteBulkAction::make(),
                 RestoreBulkAction::make(),
-                Action::make('export_selected')
-                    ->label('Export Selected')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(function ($records) {
-                        // todo:: Export to CSV/Excel
-                    }),
+                /*
+                 * Contributed by other modules — currently the FHIR bulk export.
+                 *
+                 * This replaced an `export_selected` action whose body was a
+                 * `// todo:: Export to CSV/Excel` and which, lacking
+                 * `accessSelectedRecords()`, threw as soon as it was clicked:
+                 * "attempting to access the selected records ... so they are not
+                 * available".
+                 */
+                ...app(TableBulkActionsRegistry::class)->for(static::class),
                 Action::make('activate_selected')
                     ->label('Activate Selected')
                     ->icon('heroicon-o-user-plus')
