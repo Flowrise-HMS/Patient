@@ -42,12 +42,12 @@ class PatientResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        return [
+        return array_filter([
             'Name' => $record->full_name,
             'MRN' => $record->mrn,
             'Phone' => $record->phone,
             'Email' => $record->email,
-        ];
+        ]);
     }
 
     public static function form(Schema $schema): Schema

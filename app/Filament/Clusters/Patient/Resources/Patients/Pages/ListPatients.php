@@ -7,7 +7,9 @@ use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Classes\Support\PageHeaderActionsRegistry;
+use Modules\Core\Filament\Support\SuperAdminExportAction;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
+use Modules\Patient\Filament\Exports\PatientExporter;
 use Modules\Patient\Filament\Imports\PatientImporter;
 
 class ListPatients extends ListRecords
@@ -21,6 +23,7 @@ class ListPatients extends ListRecords
                 ->importer(PatientImporter::class)
                 ->visible(fn () => Auth::user()?->can('import_patients'))
                 ->color('info'),
+            SuperAdminExportAction::make(PatientExporter::class),
             CreateAction::make(),
 
             /*
