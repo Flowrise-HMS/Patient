@@ -14,12 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Modules\Appointment\Models\Appointment;
-use Modules\Billing\Models\Invoice;
-use Modules\Billing\Models\Payment;
-use Modules\Clinical\Models\Allergy;
-use Modules\Clinical\Models\Encounter;
-use Modules\Clinical\Models\VitalSign;
 use Modules\Core\Contracts\ProvidesClientIdentity;
 use Modules\Core\Enums\Title;
 use Modules\Core\Models\BaseModel;
@@ -41,14 +35,16 @@ use Spatie\MediaLibrary\HasMedia;
  * @property string|null $merged_into_patient_id
  * @property Carbon|null $merged_at
  * @property int|null $merged_by
- * @property-read Collection<int, Encounter> $encounters
- * @property-read Encounter|null $latestEncounter
- * @property-read Encounter|null $activeEncounter
- * @property-read VitalSign|null $latestVitals
- * @property-read Collection<int, Allergy> $allergies
- * @property-read Collection<int, Appointment> $appointments
- * @property-read Collection<int, Invoice> $invoices
- * @property-read Collection<int, Payment> $payments
+ *                               Peer-module relations below are registered at runtime via resolveRelationUsing();
+ *                               they are referenced by FQCN so this model never hard-imports an optional module.
+ * @property-read Collection<int, \Modules\Clinical\Models\Encounter> $encounters
+ * @property-read \Modules\Clinical\Models\Encounter|null $latestEncounter
+ * @property-read \Modules\Clinical\Models\Encounter|null $activeEncounter
+ * @property-read \Modules\Clinical\Models\VitalSign|null $latestVitals
+ * @property-read Collection<int, \Modules\Clinical\Models\Allergy> $allergies
+ * @property-read Collection<int, \Modules\Appointment\Models\Appointment> $appointments
+ * @property-read Collection<int, \Modules\Billing\Models\Invoice> $invoices
+ * @property-read Collection<int, \Modules\Billing\Models\Payment> $payments
  *
  * @method \Illuminate\Database\Eloquent\Relations\HasMany encounters()
  * @method \Illuminate\Database\Eloquent\Relations\HasMany diagnoses()
