@@ -24,6 +24,8 @@ class PatientImporter extends Importer
                 ->rules(['max:36']),
             ImportColumn::make('mrn')
                 ->rules(['max:255']),
+            ImportColumn::make('old_hospital_number')
+                ->rules(['nullable', 'max:64']),
             ImportColumn::make('title')
                 ->rules(['max:255']),
             ImportColumn::make('first_name')
@@ -96,6 +98,18 @@ class PatientImporter extends Importer
             $patient = Patient::where('mrn', $this->data['mrn'])->first();
             if ($patient) {
                 return $patient;
+            }
+        }
+
+        if (filled($this->data['old_hospital_number'] ?? null)) {
+            $matches = Patient::query()
+                ->notMerged()
+                ->where('old_hospital_number', $this->data['old_hospital_number'])
+                ->limit(2)
+                ->get();
+
+            if ($matches->count() === 1) {
+                return $matches->first();
             }
         }
 

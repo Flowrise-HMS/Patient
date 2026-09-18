@@ -16,6 +16,7 @@ class PatientExporter extends Exporter
         return [
             ExportColumn::make('id'),
             ExportColumn::make('mrn'),
+            ExportColumn::make('old_hospital_number'),
             ExportColumn::make('title'),
             ExportColumn::make('first_name'),
             ExportColumn::make('middle_name'),

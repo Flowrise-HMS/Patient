@@ -5,12 +5,19 @@ namespace Modules\Patient\Tests\Unit;
 use Modules\Core\Classes\Support\RelationManagersRegistry;
 use Modules\Core\Support\ModuleAvailability;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\PatientDocumentsRelationManager;
 use Nwidart\Modules\Facades\Module;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PatientResourceRelationManagersSoftBoundaryTest extends TestCase
 {
+    #[Test]
+    public function it_always_includes_the_patient_documents_relation_manager(): void
+    {
+        $this->assertContains(PatientDocumentsRelationManager::class, PatientResource::getRelations());
+    }
+
     #[Test]
     public function it_includes_billing_relation_managers_when_billing_is_enabled(): void
     {

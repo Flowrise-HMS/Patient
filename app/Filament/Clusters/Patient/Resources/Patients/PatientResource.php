@@ -18,6 +18,7 @@ use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\EditPatie
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatientActivities;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ListPatients;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Pages\ViewPatient;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\PatientDocumentsRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\RelationManagers\SchoolsRelationManager;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientInfolist;
@@ -45,6 +46,7 @@ class PatientResource extends Resource
         return array_filter([
             'Name' => $record->full_name,
             'MRN' => $record->mrn,
+            'Old Hospital No.' => $record->old_hospital_number,
             'Phone' => $record->phone,
             'Email' => $record->email,
         ]);
@@ -69,6 +71,7 @@ class PatientResource extends Resource
     {
         $relations = [
             SchoolsRelationManager::class,
+            PatientDocumentsRelationManager::class,
         ];
 
         $optionalByModule = [

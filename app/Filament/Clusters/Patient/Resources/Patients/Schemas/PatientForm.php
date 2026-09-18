@@ -7,7 +7,6 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
@@ -23,7 +22,6 @@ use Modules\Core\Enums\Title;
 use Modules\Core\Rules\GhanaCard;
 use Modules\Insurance\Filament\Schemas\PatientInsuranceSchema;
 use Modules\Patient\Enums\BloodType;
-use Modules\Patient\Enums\DocumentType;
 use Modules\Patient\Enums\EducationLevel;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\IdentifierType;
@@ -92,13 +90,20 @@ class PatientForm
             ->description('Required information for patient registration')
             ->columnSpanFull()
             ->schema([
-                TextInput::make('mrn')
-                    ->label('Medical Record Number')
-                    ->disabled()
-                    ->dehydrated()
-                    ->prefixIcon('heroicon-m-identification')
-                    ->hint('Auto-generated')
-                    ->columnSpanFull(),
+                Grid::make(2)->schema([
+                    TextInput::make('mrn')
+                        ->label('Medical Record Number')
+                        ->disabled()
+                        ->dehydrated()
+                        ->prefixIcon('heroicon-m-identification')
+                        ->hint('Auto-generated'),
+
+                    TextInput::make('old_hospital_number')
+                        ->label('Old Hospital Number')
+                        ->maxLength(64)
+                        ->prefixIcon('heroicon-m-archive-box')
+                        ->helperText('Number from the previous HMS or paper folder, if any'),
+                ]),
 
                 Grid::make(4)->schema([
                     Select::make('title')
@@ -450,43 +455,5 @@ class PatientForm
         }
 
         return $form;
-    }
-
-    public static function documentsSection(): array
-    {
-        return [
-            Repeater::make('documents')
-                ->relationship('documents')
-                ->schema([
-                    TextInput::make('title')
-                        ->label('Document Title')
-                        ->required()
-                        ->placeholder('e.g., National ID Card'),
-
-                    Select::make('document_type')
-                        ->label('Document Type')
-                        ->options(DocumentType::class)
-                        ->required()
-                        ->live(),
-
-                    DatePicker::make('expires_at')
-                        ->label('Expiry Date')
-                        ->native(true)
-                        ->displayFormat('d M Y')
-                        ->minDate(now()),
-
-                    Textarea::make('description')
-                        ->label('Description')
-                        ->placeholder('Optional notes about this document')
-                        ->rows(2),
-
-                    Textarea::make('notes')
-                        ->label('Internal Notes')
-                        ->placeholder('Internal notes (not visible to patient)')
-                        ->rows(2),
-                ])
-                ->columns(2)
-                ->addActionLabel('Add Document'),
-        ];
     }
 }

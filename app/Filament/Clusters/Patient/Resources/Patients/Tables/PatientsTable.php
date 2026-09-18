@@ -73,6 +73,13 @@ class PatientsTable
                 ->color('primary')
                 ->copyable()
                 ->copyableState(fn ($state) => $state),
+            TextColumn::make('old_hospital_number')
+                ->label('Old Hosp. No.')
+                ->searchable()
+                ->sortable()
+                ->copyable()
+                ->placeholder('-')
+                ->toggleable(isToggledHiddenByDefault: true),
             ClientIdentityColumn::make(label: 'Patient Name', patientRelation: null, withIdentifier: false)
                 ->sortable(['last_name'])
                 ->wrap(),
@@ -201,6 +208,15 @@ class PatientsTable
                 ->placeholder('All Patients')
                 ->trueLabel('Active Only')
                 ->falseLabel('Inactive Only'),
+            TernaryFilter::make('merged')
+                ->label('Merged')
+                ->placeholder('All')
+                ->trueLabel('Merged into another profile')
+                ->falseLabel('Not merged')
+                ->queries(
+                    true: fn (Builder $query) => $query->whereNotNull('merged_into_patient_id'),
+                    false: fn (Builder $query) => $query->whereNull('merged_into_patient_id'),
+                ),
             SelectFilter::make('age_group')
                 ->label('Age Group')
                 ->options([

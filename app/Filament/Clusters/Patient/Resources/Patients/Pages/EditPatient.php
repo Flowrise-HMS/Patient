@@ -17,6 +17,13 @@ class EditPatient extends EditRecord
 
     protected static string $resource = PatientResource::class;
 
+    protected function authorizeAccess(): void
+    {
+        parent::authorizeAccess();
+
+        abort_if($this->getRecord()->isMerged(), 403, __('This profile was merged into another patient and can no longer be edited.'));
+    }
+
     protected function getHeaderActions(): array
     {
         return [

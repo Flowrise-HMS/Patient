@@ -3,13 +3,14 @@
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas;
 
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Core\Filament\Infolists\Components\CurrencyEntry;
+use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
+use Modules\Patient\Models\Patient;
 
 class PatientInfolist
 {
@@ -17,8 +18,25 @@ class PatientInfolist
     {
         return $schema
             ->components([
+                Section::make(__('Merged profile'))
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->iconColor('warning')
+                    ->visible(fn (Patient $record): bool => $record->isMerged())
+                    ->schema([
+                        TextEntry::make('merged_notice')
+                            ->hiddenLabel()
+                            ->state(fn (Patient $record): string => __('This profile was merged into :name (MRN :mrn) and is kept for reference only. Open the surviving record to continue care.', [
+                                'name' => $record->mergedInto?->full_name ?? '-',
+                                'mrn' => $record->mergedInto?->mrn ?? '-',
+                            ]))
+                            ->color('warning')
+                            ->url(fn (Patient $record): ?string => $record->merged_into_patient_id
+                                ? PatientResource::getUrl('view', ['record' => $record->merged_into_patient_id])
+                                : null),
+                    ]),
+
                 Section::make('Personal Information')
-                    ->columns(3)
+                    ->columns(4)
                     ->schema([
                         ImageEntry::make('photo')
                             ->label('Photo')
@@ -27,28 +45,15 @@ class PatientInfolist
                         TextEntry::make('full_name')
                             ->label('Full Name'),
                         TextEntry::make('mrn')
-                            ->label('MRN'),
+                            ->label('MRN')
+                            ->copyable(),
+                        TextEntry::make('old_hospital_number')
+                            ->label('Old Hospital No.')
+                            ->placeholder('-')
+                            ->copyable(),
                     ]),
 
                 ...static::billingAccountSection(),
-
-                Section::make('Documents')
-                    ->schema([
-                        RepeatableEntry::make('documents')
-                            ->label('')
-                            ->schema([
-                                TextEntry::make('title')->label('Title'),
-                                TextEntry::make('document_type')->label('Type'),
-                                TextEntry::make('is_verified')
-                                    ->label('Verified')
-                                    ->badge()
-                                    ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                                TextEntry::make('expires_at')
-                                    ->label('Expires')
-                                    ->date(),
-                            ])
-                            ->columns(4),
-                    ]),
 
                 PatientSchoolInfolist::getCurrentSchoolSection(),
             ]);

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Modules\Appointment\Models\Appointment;
 use Modules\Billing\Models\Invoice;
 use Modules\Billing\Models\Payment;
@@ -26,6 +27,7 @@ use Modules\Core\Support\ClientIdentity;
 use Modules\Core\Support\ClientIdentityResolver;
 use Modules\Core\Traits\HasAddress;
 use Modules\Core\Traits\HasContact;
+use Modules\Core\Traits\HasDocumentMedia;
 use Modules\Patient\Database\Factories\PatientFactory;
 use Modules\Patient\Enums\BloodType;
 use Modules\Patient\Enums\EducationLevel;
@@ -33,9 +35,12 @@ use Modules\Patient\Enums\Gender;
 use Modules\Patient\Enums\MaritalStatus;
 use Modules\Patient\Observers\PatientObserver;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
+ * @property string|null $old_hospital_number
+ * @property string|null $merged_into_patient_id
+ * @property Carbon|null $merged_at
+ * @property int|null $merged_by
  * @property-read Collection<int, Encounter> $encounters
  * @property-read Encounter|null $latestEncounter
  * @property-read Encounter|null $activeEncounter
@@ -62,13 +67,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
 {
-    use HasAddress, HasContact, HasFactory, HasUuids, InteractsWithMedia, Notifiable, SoftDeletes;
+    use HasAddress, HasContact, HasDocumentMedia, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     protected $keyType = 'string';
 
     protected $fillable = [
         'global_uuid',
-        'user_id', 'branch_id', 'mrn', 'title', 'first_name', 'middle_name', 'last_name',
+        'user_id', 'branch_id', 'mrn', 'old_hospital_number', 'title', 'first_name', 'middle_name', 'last_name',
         'date_of_birth', 'is_date_of_birth_estimated', 'gender', 'blood_type', 'marital_status',
         'education_level', 'occupation', 'nationality', 'address', 'contact',
         'phone', 'email', 'preferred_language', 'photo', 'is_active', 'is_deceased', 'deceased_at', 'encrypted_fields', 'meta',
@@ -83,6 +88,7 @@ class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
         'education_level' => EducationLevel::class,
         'date_of_birth' => 'datetime:Y-m-d H:i:s',
         'deceased_at' => 'datetime',
+        'merged_at' => 'datetime',
         'is_deceased' => 'boolean',
         'is_active' => 'boolean',
         'meta' => 'array',
@@ -123,6 +129,34 @@ class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
     public function currentSchool(): HasMany
     {
         return $this->hasMany(PatientSchool::class)->where('is_current', true);
+    }
+
+    /** The surviving profile this record was merged into, if any. */
+    public function mergedInto(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'merged_into_patient_id')->withTrashed();
+    }
+
+    /** Duplicate profiles that were merged into this one. */
+    public function mergedFrom(): HasMany
+    {
+        return $this->hasMany(self::class, 'merged_into_patient_id')->withTrashed();
+    }
+
+    public function merges(): HasMany
+    {
+        return $this->hasMany(PatientMerge::class, 'target_patient_id');
+    }
+
+    public function isMerged(): bool
+    {
+        return filled($this->merged_into_patient_id);
+    }
+
+    #[Scope]
+    protected function notMerged(Builder $query)
+    {
+        return $query->whereNull('merged_into_patient_id');
     }
 
     #[Scope]
@@ -180,11 +214,6 @@ class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
         return PatientFactory::new();
     }
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('documents');
-    }
-
     public function routeNotificationForMail($notification = null): ?string
     {
         return $this->email ?: null;
@@ -203,10 +232,5 @@ class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
     public function hasPhoto(): bool
     {
         return (bool) $this->photo;
-    }
-
-    public function getDocumentsAttribute()
-    {
-        return $this->getMedia('documents');
     }
 }

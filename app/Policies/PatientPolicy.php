@@ -66,4 +66,9 @@ class PatientPolicy
     {
         return $authUser->can('Reorder Patient');
     }
+
+    public function merge(AuthUser $authUser, Patient $patient): bool
+    {
+        return $authUser->can('merge_patients');
+    }
 }

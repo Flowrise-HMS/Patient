@@ -15,6 +15,7 @@ class PatientCustomPermissionSeeder extends Seeder
         'discharge_patient' => ['super_admin', 'doctor', 'nurse'],
         'view_patient_balance' => ['super_admin', 'billing_clerk', 'receptionist'],
         'import_patients' => ['super_admin', 'receptionist', 'admissions_staff'],
+        'merge_patients' => ['super_admin'],
     ];
 
     public function run(): void
@@ -22,10 +23,7 @@ class PatientCustomPermissionSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         foreach ($this->matrix as $name => $roles) {
-            $perm = Permission::query()->where(['name' => $name, 'guard_name' => 'web'])->first();
-            if (! $perm) {
-                continue;
-            }
+            $perm = Permission::findOrCreate($name, 'web');
 
             foreach ($roles as $roleName) {
                 Role::query()

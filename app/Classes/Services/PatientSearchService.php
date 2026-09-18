@@ -5,12 +5,14 @@ namespace Modules\Patient\Classes\Services;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
+use Modules\Core\Support\SuperAdmin;
 use Modules\Patient\Models\Patient;
 
 class PatientSearchService implements ProvidesFilamentPatientSearch
 {
     protected array $searchableFields = [
         'mrn',
+        'old_hospital_number',
         'first_name',
         'middle_name',
         'last_name',
@@ -33,22 +35,63 @@ class PatientSearchService implements ProvidesFilamentPatientSearch
 
         return Patient::query()
             ->with(['branch', 'identifiers'])
+            ->whereNull('merged_into_patient_id')
             ->where(function ($query) use ($term) {
                 $this->applySearch($query, $term);
             })
             ->orderByRaw("CASE
-                WHEN mrn = ? THEN 0
-                WHEN mrn LIKE ? THEN 1
+                WHEN mrn = ? OR old_hospital_number = ? THEN 0
+                WHEN mrn LIKE ? OR old_hospital_number LIKE ? THEN 1
                 WHEN CONCAT(first_name, ' ', last_name) LIKE ? THEN 2
                 ELSE 3
-            END", [$term, "{$term}%", "{$term}%"])
+            END", [$term, $term, "{$term}%", "{$term}%", "{$term}%"])
             ->limit($limit)
             ->get();
     }
 
+    /**
+     * An MRN that belonged to a merged duplicate resolves to the surviving profile.
+     */
     public function searchExactMrn(string $mrn): ?Patient
     {
-        return Patient::where('mrn', $mrn)->first();
+        $patient = Patient::withTrashed()->where('mrn', $mrn)->first();
+
+        if ($patient === null) {
+            return null;
+        }
+
+        if ($patient->isMerged()) {
+            $survivor = app(PatientMergeService::class)->resolveSurvivor($patient);
+
+            return $survivor->trashed() ? null : $survivor;
+        }
+
+        return $patient->trashed() ? null : $patient;
+    }
+
+    /**
+     * Candidates a duplicate can be merged into: live, not themselves merged, and
+     * not the record being merged. Super admins may pick across branches.
+     */
+    public function searchForMergeTarget(string $term, Patient $exclude, int $limit = 20): Collection
+    {
+        $term = $this->normalizeTerm($term);
+
+        $query = Patient::query()
+            ->whereKeyNot($exclude->getKey())
+            ->whereNull('merged_into_patient_id')
+            ->where(function ($query) use ($term) {
+                $this->applySearch($query, $term);
+            })
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit($limit);
+
+        if (SuperAdmin::check()) {
+            $query->withoutGlobalScope('branch');
+        }
+
+        return $query->get();
     }
 
     public function searchByPhone(string $phone): Collection

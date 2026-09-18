@@ -3,7 +3,9 @@
 namespace Modules\Patient\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Core\Classes\Support\PatientMergeHandlersRegistry;
 use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
+use Modules\Patient\Classes\Merge\PatientOwnedTablesMergeHandler;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
@@ -42,6 +44,14 @@ class PatientServiceProvider extends ModuleServiceProvider
         parent::register();
 
         $this->app->singleton(ProvidesFilamentPatientSearch::class, PatientSearchService::class);
+    }
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        $this->app->make(PatientMergeHandlersRegistry::class)
+            ->register(PatientOwnedTablesMergeHandler::class, priority: 100);
     }
 
     /**

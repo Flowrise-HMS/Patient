@@ -29,6 +29,7 @@ class PatientFactory extends Factory
             'branch_id' => null,
             'user_id' => null,
             'mrn' => null,
+            'old_hospital_number' => null,
             'title' => fake()->randomElement([Title::cases()[0], Title::cases()[1], null]),
             'first_name' => $firstName,
             'middle_name' => fake()->optional(0.3)->firstName(),
@@ -116,6 +117,13 @@ class PatientFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'mrn' => $mrn,
+        ]);
+    }
+
+    public function withOldHospitalNumber(?string $number = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'old_hospital_number' => $number ?? 'OLD-'.fake()->unique()->numberBetween(1000, 999999),
         ]);
     }
 

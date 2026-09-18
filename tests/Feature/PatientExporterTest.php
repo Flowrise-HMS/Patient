@@ -125,7 +125,7 @@ class PatientExporterTest extends TestCase
     {
         $names = collect(PatientExporter::getColumns())->map(fn ($column) => $column->getName())->all();
 
-        foreach (['mrn', 'first_name', 'last_name', 'phone', 'email', 'branch.name'] as $expected) {
+        foreach (['mrn', 'old_hospital_number', 'first_name', 'last_name', 'phone', 'email', 'branch.name'] as $expected) {
             $this->assertContains($expected, $names);
         }
     }
