@@ -65,26 +65,20 @@ class ViewPatient extends ViewRecord
             'Clinical',
         );
 
-        $actions = [$activities];
-
-        if ($clinicalActions !== null) {
-            $actions = [
-                ...$actions,
-                $clinicalActions->printHospitalCardAction(),
-                $clinicalActions->assignToWardAction(),
-                $clinicalActions->transferInternalAction(),
-                $clinicalActions->transferOutAction(),
-                $clinicalActions->dischargeAction(),
-                $clinicalActions->medicationOrder(),
-                $clinicalActions->profileAction(),
-                $clinicalActions->timelineAction(),
-            ];
+        // Primary row mirrors the clinical workspace/profile pages; everything else
+        // (ADT, orders, notes, merge...) lives inside the "More Actions" group.
+        if ($clinicalActions === null) {
+            return [$activities, MergePatientAction::make(), EditAction::make()];
         }
 
-        $actions[] = MergePatientAction::make();
-        $actions[] = EditAction::make();
-
-        return $actions;
+        return [
+            $activities,
+            $clinicalActions->clinicalWorkspaceAction(),
+            $clinicalActions->timelineAction(),
+            $clinicalActions->profileAction(),
+            $clinicalActions->patientActionGroups([MergePatientAction::make()]),
+            EditAction::make(),
+        ];
     }
 
     #[Override]
