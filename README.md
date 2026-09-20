@@ -9,30 +9,36 @@ Before anyone can document a visit, order a test, or schedule an appointment, th
 ## Where Patient fits in FlowRise
 
 - **Depends on Core** for organization and branch context (where the patient is registered) and shared platform services.
-- **Clinical, Appointment, Billing, and Insurance** features all assume a `Patient` record exists when they record encounters, bookings, charges, or policies.
+- **Clinical, MCH, Appointment, Billing, Insurance, Pharmacy, Diagnostics and FHIR** features all assume a `Patient` record exists when they record encounters, bookings, charges, policies, dispenses, results or exchange FHIR resources.
 
 ```mermaid
 flowchart LR
   Core[Core]
   Patient[Patient]
   Clinical[Clinical]
+  MCH[MCH]
   Appointment[Appointment]
   Billing[Billing]
   Insurance[Insurance]
+  FHIR[FHIR]
   Core --> Patient
   Patient --> Clinical
+  Patient --> MCH
   Patient --> Appointment
   Patient --> Billing
   Patient --> Insurance
+  Patient --> FHIR
 ```
 
 ## What you can do with it (everyday language)
 
-- **Register a new patient** with demographics and contact information.
-- **Assign and manage identifiers** (MRN, NHIS or other insurance numbers, national ID, passport, custom IDs).
+- **Register a new patient** with demographics, identifiers, insurance membership, school history, contact information and emergency contacts in a two-step wizard (**Patient Care → Patients → New patient**), or in-place from the Clinical / MCH workspaces.
+- **Assign and manage identifiers** (auto-generated MRN, old hospital number, Ghana Card, passport, driver's licence, birth certificate, SSNIT, voter ID, alien ID, other). NHIS membership is recorded in the Insurance Information section supplied by the Insurance module.
 - **Maintain emergency contacts** (next of kin) for when the care team must reach someone quickly.
-- **Search and open** a patient dossier from reception or clinical workflows.
-- **Protect sensitive fields** (the system encrypts many personally identifiable fields at rest—think phone, email, and similar data).
+- **Search and open** a patient dossier from reception or clinical workflows (global search, table search and filters).
+- **Upload documents** (PDF, images, Word) with preview/download through signed links.
+- **Print a hospital card**, **import** patients from CSV, **export** (super admins) and **merge duplicate profiles**.
+- **Protect sensitive fields** (phone, email, identifier values and emergency contact details are encrypted at rest).
 
 Exact screens and click paths are described for staff in the [User guide: Patient management](../../docs/user-guide/patient-management.md).
 
@@ -47,12 +53,13 @@ Exact screens and click paths are described for staff in the [User guide: Patien
 
 | Path | Purpose |
 |------|---------|
-| `app/Models/` | `Patient`, identifiers, emergency contacts, schools, etc. |
-| `app/Classes/Services/` | Registration, search, identifiers, schools—**the place business rules live**. |
-| `app/Filament/` | Patient cluster, resources, forms, tables, and pages staff interact with. |
-| `app/Policies/` | Fine-grained access (who may create or view a patient). |
-| `app/Events/`, `app/Observers/` | Hooks when patients are created or updated (for integrations and side effects). |
-| `database/migrations/` | Schema for patient-related tables. |
+| `app/Models/` | `Patient`, `PatientIdentifier`, `EmergencyContact`, `PatientSchool`, `PatientRelationship` (mother/child), `PatientMerge`. |
+| `app/Classes/Services/` | Registration, search, identifiers, emergency contacts, schools, merge, analytics—**the place business rules live**. |
+| `app/Filament/` | Patient cluster and resource (wizard form, table, view with module-contributed tabs), `MergePatientAction`, importer/exporter, five dashboard widgets. |
+| `app/Policies/` | Fine-grained access (who may create, view or merge a patient). |
+| `app/Events/`, `app/Observers/` | `PatientRegistered/Updated/Deactivated/Deceased/PatientsMerged` events; observer that generates the MRN. |
+| `app/Http/` | Hospital card PDF route, `GET /api/v1/patients` REST controller, FHIR `PatientTransformer`. |
+| `database/migrations/` | 13 migrations for patient-related tables. |
 
 ## Dependencies
 
@@ -62,7 +69,7 @@ Rollout status for all modules: [Module status](../../docs/shared/module-status.
 
 ## Further reading
 
-- **Implementation plan (technical depth):** [docs/implementation-plan.md](docs/implementation-plan.md)
+- **Implementation record (technical depth):** [docs/implementation-plan.md](docs/implementation-plan.md)
 - **Staff-facing patient guide:** [Patient management](../../docs/user-guide/patient-management.md)
 
 ## For developers
@@ -70,4 +77,6 @@ Rollout status for all modules: [Module status](../../docs/shared/module-status.
 - **Namespace:** `Modules\Patient\...`
 - **Service provider:** `Modules\Patient\Providers\PatientServiceProvider`
 - **Prefer services over ad hoc `Model::create()`** in new code so rules stay consistent with existing patterns.
-- **Tests:** under `tests/`; run from repo root with paths pointing at `Modules/Patient/tests` as needed.
+- **Custom permissions:** `print_hospital_card`, `discharge_patient`, `view_patient_balance`, `import_patients`, `merge_patients`.
+- **Extension points:** other modules add tabs with `RelationManagersRegistry`, header/bulk actions with `PageHeaderActionsRegistry` / `TableBulkActionsRegistry`, and merge handlers with `PatientMergeHandlersRegistry` (all in Core).
+- **Tests:** `php artisan test --compact Modules/Patient/tests` (25 test files).
