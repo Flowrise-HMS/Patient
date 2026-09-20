@@ -39,7 +39,7 @@ class PatientAnalyticsService
                     'id' => (string) $patient->id,
                     'mrn' => $patient->mrn,
                     'name' => $patient->full_name,
-                    'gender' => $patient->gender?->value ?? (is_string($patient->gender) ? $patient->gender : null),
+                    'gender' => enum_value($patient->gender),
                     'region' => $this->resolveRegionLabel($patient->address ?? []),
                     'created_at' => $patient->created_at?->toIso8601String() ?? '',
                 ];

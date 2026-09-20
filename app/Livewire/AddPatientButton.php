@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Modules\Core\Classes\Services\BranchService;
+use Modules\Core\Settings\FeatureSettings;
 use Modules\Core\Support\OptionalClass;
 use Modules\Patient\Events\PatientRegistered;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\Schemas\PatientForm;
@@ -46,7 +47,8 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
                 ...PatientForm::getSteps(),
                 Toggle::make('print_card')
                     ->label(__('Print hospital card'))
-                    ->visible(fn (): bool => Auth::check() && Auth::user()?->can('print_hospital_card')),
+                    ->visible(fn (): bool => app(FeatureSettings::class)->patient_hospital_card_enabled
+                        && Auth::check() && Auth::user()?->can('print_hospital_card')),
             ])
             ->mutateDataUsing(function (array $data): array {
                 $data['branch_id'] = $data['branch_id'] ?? app(BranchService::class)->getDefaultBranchId();
@@ -87,7 +89,7 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
 
                 $this->dispatch('patientCreated', patientId: $record->id);
 
-                if (! empty($data['print_card'])) {
+                if (! empty($data['print_card']) && app(FeatureSettings::class)->patient_hospital_card_enabled) {
                     $this->redirect(route('patients.hospital-card', $record));
                 } else {
                     OptionalClass::when(

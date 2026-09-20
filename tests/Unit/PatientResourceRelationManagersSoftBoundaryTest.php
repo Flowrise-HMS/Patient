@@ -106,11 +106,11 @@ class PatientResourceRelationManagersSoftBoundaryTest extends TestCase
     }
 
     #[Test]
-    public function it_skips_missing_insurance_relation_manager(): void
+    public function it_includes_the_insurance_policies_relation_manager_when_insurance_is_enabled(): void
     {
         $relations = PatientResource::getRelations();
 
-        $this->assertNotContains(
+        $this->assertContains(
             'Modules\\Insurance\\Filament\\RelationManagers\\PatientPoliciesRelationManager',
             $relations,
         );
