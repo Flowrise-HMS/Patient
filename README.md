@@ -35,7 +35,7 @@ flowchart LR
 - **Register a new patient** with demographics, identifiers, insurance membership, school history, contact information and emergency contacts in a two-step wizard (**Patient Care → Patients → New patient**), or in-place from the Clinical / MCH workspaces.
 - **Assign and manage identifiers** (auto-generated MRN, old hospital number, Ghana Card, passport, driver's licence, birth certificate, SSNIT, voter ID, alien ID, other). NHIS membership is recorded in the Insurance Information section supplied by the Insurance module.
 - **Maintain emergency contacts** (next of kin) for when the care team must reach someone quickly.
-- **Search and open** a patient dossier from reception or clinical workflows (global search, table search and filters).
+- **Search and open** a patient dossier from reception or clinical workflows (global search, table search and filters) by name, MRN, old hospital number, or the full phone number, email or ID number (matched through blind indexes of the encrypted values; run `php artisan patients:rebuild-search-indexes` after importing data or rotating `APP_KEY`).
 - **Upload documents** (PDF, images, Word) with preview/download through signed links.
 - **Print a hospital card**, **import** patients from CSV, **export** (super admins) and **merge duplicate profiles**.
 - **Protect sensitive fields** (phone, email, identifier values and emergency contact details are encrypted at rest).
@@ -58,6 +58,7 @@ Exact screens and click paths are described for staff in the [User guide: Patien
 | `app/Filament/` | Patient cluster and resource (wizard form, table, view with module-contributed tabs), `MergePatientAction`, importer/exporter, five dashboard widgets. |
 | `app/Policies/` | Fine-grained access (who may create, view or merge a patient). |
 | `app/Events/`, `app/Observers/` | `PatientRegistered/Updated/Deactivated/Deceased/PatientsMerged` events; observer that generates the MRN. |
+| `app/Console/` | `patients:rebuild-search-indexes` (recomputes the phone/email/identifier blind indexes). |
 | `app/Http/` | Hospital card PDF route, `GET /api/v1/patients` REST controller, FHIR `PatientTransformer`. |
 | `database/migrations/` | 13 migrations for patient-related tables. |
 

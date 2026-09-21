@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Traits\HasBlindIndexes;
 use Modules\Patient\Database\Factories\PatientIdentifierFactory;
 
 class PatientIdentifier extends Model
 {
-    use HasFactory, HasUuids;
+    use HasBlindIndexes, HasFactory, HasUuids;
 
     protected $keyType = 'string';
 
@@ -29,6 +30,16 @@ class PatientIdentifier extends Model
         'issue_date' => 'date',
         'expiry_date' => 'date',
     ];
+
+    /**
+     * @return array<string, array{column: string, type: string}>
+     */
+    public function blindIndexes(): array
+    {
+        return [
+            'value' => ['column' => 'value_index', 'type' => 'identifier'],
+        ];
+    }
 
     protected static function newFactory(): PatientIdentifierFactory
     {

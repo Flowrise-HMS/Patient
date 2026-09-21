@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Modules\Core\Traits\HasBlindIndexes;
 use Modules\Patient\Database\Factories\EmergencyContactFactory;
 
 class EmergencyContact extends Model
 {
-    use HasFactory, HasUuids, Notifiable;
+    use HasBlindIndexes, HasFactory, HasUuids, Notifiable;
 
     protected $keyType = 'string';
 
@@ -41,6 +42,18 @@ class EmergencyContact extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id');
+    }
+
+    /**
+     * @return array<string, array{column: string, type: string}>
+     */
+    public function blindIndexes(): array
+    {
+        return [
+            'phone' => ['column' => 'phone_index', 'type' => 'phone'],
+            'alternate_phone' => ['column' => 'alternate_phone_index', 'type' => 'phone'],
+            'email' => ['column' => 'email_index', 'type' => 'email'],
+        ];
     }
 
     public function routeNotificationForMail($notification = null): ?string

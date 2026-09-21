@@ -2,12 +2,15 @@
 
 namespace Modules\Patient\Filament\Clusters\Patient\Resources\Patients;
 
+use Filament\Actions\Action;
+use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 use Modules\Core\Classes\Support\RelationManagersRegistry;
 use Modules\Core\Enums\NavigationGroup;
 use Modules\Core\Support\ModuleAvailability;
@@ -39,6 +42,35 @@ class PatientResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return app(PatientSearchService::class)->getSearchableFields();
+    }
+
+    /**
+     * Route global search through PatientSearchService so encrypted phone,
+     * email and identifier values match via their blind indexes and results
+     * keep the service's MRN-first ranking.
+     */
+    public static function getGlobalSearchResults(string $search): Collection
+    {
+        return app(PatientSearchService::class)
+            ->search($search, static::getGlobalSearchResultsLimit())
+            ->map(function (Model $record): ?GlobalSearchResult {
+                $url = static::getGlobalSearchResultUrl($record);
+
+                if (blank($url)) {
+                    return null;
+                }
+
+                return new GlobalSearchResult(
+                    title: static::getGlobalSearchResultTitle($record),
+                    url: $url,
+                    details: static::getGlobalSearchResultDetails($record),
+                    actions: array_map(
+                        fn (Action $action) => $action->hasRecord() ? $action : $action->record($record),
+                        static::getGlobalSearchResultActions($record),
+                    ),
+                );
+            })
+            ->filter();
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array

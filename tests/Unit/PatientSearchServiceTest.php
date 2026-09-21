@@ -89,9 +89,8 @@ class PatientSearchServiceTest extends TestCase
 
     public function test_search_by_phone_normalizes_and_finds(): void
     {
-        $this->markTestSkipped('Phone field is encrypted - cannot search directly');
-
         $patient = Patient::factory()->create(['phone' => '+233244123456']);
+        Patient::factory()->create(['phone' => '+233244123457']);
 
         $results = $this->service->searchByPhone('0244123456');
 
@@ -101,13 +100,78 @@ class PatientSearchServiceTest extends TestCase
 
     public function test_search_by_phone_handles_country_code(): void
     {
-        $this->markTestSkipped('Phone field is encrypted - cannot search directly');
-
         $patient = Patient::factory()->create(['phone' => '0244123456']);
 
-        $results = $this->service->searchByPhone('+233244123456');
+        $results = $this->service->searchByPhone('+233 244 123 456');
 
         $this->assertCount(1, $results);
+        $this->assertEquals($patient->id, $results->first()->id);
+    }
+
+    public function test_search_finds_a_patient_by_exact_phone_in_any_spelling(): void
+    {
+        $patient = Patient::factory()->create(['first_name' => 'Ama', 'last_name' => 'Mensah', 'phone' => '0244123456']);
+        Patient::factory()->create(['first_name' => 'Kofi', 'last_name' => 'Mensah', 'phone' => '0244999999']);
+
+        foreach (['0244123456', '+233244123456', '233 244 123 456', '024-412-3456'] as $term) {
+            $results = $this->service->search($term);
+
+            $this->assertCount(1, $results, "Term {$term}");
+            $this->assertEquals($patient->id, $results->first()->id, "Term {$term}");
+        }
+    }
+
+    public function test_search_finds_a_patient_by_exact_email_case_insensitively(): void
+    {
+        $patient = Patient::factory()->create(['email' => 'Ama.Mensah@Example.com']);
+        Patient::factory()->create(['email' => 'kofi@example.com']);
+
+        $results = $this->service->search('ama.mensah@example.com');
+
+        $this->assertCount(1, $results);
+        $this->assertEquals($patient->id, $results->first()->id);
+        $this->assertCount(1, $this->service->searchByEmail('AMA.MENSAH@EXAMPLE.COM'));
+    }
+
+    public function test_search_finds_a_patient_by_emergency_contact_phone_or_email(): void
+    {
+        $patient = Patient::factory()->create(['phone' => '0200000001', 'email' => 'patient@example.com']);
+        $patient->emergencyContacts()->create([
+            'name' => 'Next of Kin',
+            'relationship' => 'spouse',
+            'phone' => '0555555555',
+            'email' => 'kin@example.com',
+            'is_primary' => true,
+        ]);
+        Patient::factory()->create(['phone' => '0200000002']);
+
+        $byPhone = $this->service->search('+233555555555');
+        $byEmail = $this->service->search('KIN@example.com');
+
+        $this->assertCount(1, $byPhone);
+        $this->assertEquals($patient->id, $byPhone->first()->id);
+        $this->assertCount(1, $byEmail);
+        $this->assertEquals($patient->id, $byEmail->first()->id);
+    }
+
+    public function test_search_finds_a_patient_by_identifier_value(): void
+    {
+        $patient = Patient::factory()->create();
+        PatientIdentifier::factory()->create(['patient_id' => $patient->id, 'value' => 'GHA-123456789-0']);
+        Patient::factory()->create();
+
+        $results = $this->service->search('gha 123456789 0');
+
+        $this->assertCount(1, $results);
+        $this->assertEquals($patient->id, $results->first()->id);
+    }
+
+    public function test_partial_phone_numbers_do_not_match(): void
+    {
+        Patient::factory()->create(['first_name' => 'Ama', 'last_name' => 'Mensah', 'phone' => '0244123456']);
+
+        $this->assertCount(0, $this->service->search('123456'));
+        $this->assertCount(0, $this->service->searchByPhone('3456'));
     }
 
     public function test_get_recent_patients_returns_patients_ordered_by_created(): void
@@ -235,7 +299,9 @@ class PatientSearchServiceTest extends TestCase
 
         $this->assertContains('patient.mrn', $attributes);
         $this->assertContains('patient.first_name', $attributes);
-        $this->assertContains('patient.identifiers.value', $attributes);
+        $this->assertContains('patient.identifiers.type', $attributes);
+        $this->assertNotContains('patient.identifiers.value', $attributes);
+        $this->assertNotContains('patient.phone', $attributes);
         $this->assertNotContains('mrn', $attributes);
     }
 
@@ -245,7 +311,8 @@ class PatientSearchServiceTest extends TestCase
 
         $this->assertContains('mrn', $attributes);
         $this->assertContains('first_name', $attributes);
-        $this->assertContains('identifiers.value', $attributes);
+        $this->assertContains('identifiers.type', $attributes);
+        $this->assertNotContains('identifiers.value', $attributes);
         $this->assertNotContains('patient.mrn', $attributes);
     }
 
@@ -254,6 +321,6 @@ class PatientSearchServiceTest extends TestCase
         $attributes = $this->service->getFilamentRelationSearchableAttributes('serviceRequest.patient');
 
         $this->assertContains('serviceRequest.patient.mrn', $attributes);
-        $this->assertContains('serviceRequest.patient.identifiers.value', $attributes);
+        $this->assertContains('serviceRequest.patient.identifiers.type', $attributes);
     }
 }

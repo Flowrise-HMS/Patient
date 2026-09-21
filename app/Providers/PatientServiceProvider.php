@@ -7,6 +7,7 @@ use Modules\Core\Classes\Support\PatientMergeHandlersRegistry;
 use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
 use Modules\Patient\Classes\Merge\PatientOwnedTablesMergeHandler;
 use Modules\Patient\Classes\Services\PatientSearchService;
+use Modules\Patient\Console\RebuildPatientSearchIndexes;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class PatientServiceProvider extends ModuleServiceProvider
@@ -26,7 +27,9 @@ class PatientServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        RebuildPatientSearchIndexes::class,
+    ];
 
     /**
      * Provider classes to register.

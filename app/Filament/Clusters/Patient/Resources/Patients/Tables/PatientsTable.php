@@ -29,6 +29,7 @@ use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
 use Modules\Core\Support\OptionalClass;
 use Modules\Core\Support\SuperAdmin;
 use Modules\Insurance\Services\MemberVerificationService;
+use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
@@ -39,6 +40,9 @@ class PatientsTable
     {
         return $table
             ->columns(static::getColumns())
+            // Encrypted phone/email are matched through blind indexes, so the
+            // whole search goes through PatientSearchService.
+            ->searchUsing(fn (Builder $query, string $search) => app(PatientSearchService::class)->applyToQuery($query, $search))
             ->filters(static::getFilters())
             ->filters(static::getFilters(), layout: FiltersLayout::Dropdown)
             ->filtersFormColumns(3)

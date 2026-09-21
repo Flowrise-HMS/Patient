@@ -20,6 +20,7 @@ use Modules\Core\Models\BaseModel;
 use Modules\Core\Support\ClientIdentity;
 use Modules\Core\Support\ClientIdentityResolver;
 use Modules\Core\Traits\HasAddress;
+use Modules\Core\Traits\HasBlindIndexes;
 use Modules\Core\Traits\HasContact;
 use Modules\Core\Traits\HasDocumentMedia;
 use Modules\Patient\Database\Factories\PatientFactory;
@@ -63,7 +64,7 @@ use Spatie\MediaLibrary\HasMedia;
 #[ObservedBy([PatientObserver::class])]
 class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
 {
-    use HasAddress, HasContact, HasDocumentMedia, HasFactory, HasUuids, Notifiable, SoftDeletes;
+    use HasAddress, HasBlindIndexes, HasContact, HasDocumentMedia, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     protected $keyType = 'string';
 
@@ -208,6 +209,17 @@ class Patient extends BaseModel implements HasMedia, ProvidesClientIdentity
     protected static function newFactory(): PatientFactory
     {
         return PatientFactory::new();
+    }
+
+    /**
+     * @return array<string, array{column: string, type: string}>
+     */
+    public function blindIndexes(): array
+    {
+        return [
+            'phone' => ['column' => 'phone_index', 'type' => 'phone'],
+            'email' => ['column' => 'email_index', 'type' => 'email'],
+        ];
     }
 
     public function routeNotificationForMail($notification = null): ?string

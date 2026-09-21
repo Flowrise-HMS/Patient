@@ -5,26 +5,31 @@ namespace Modules\Patient\Classes\Services;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Core\Contracts\ProvidesFilamentPatientSearch;
+use Modules\Core\Support\BlindIndex;
 use Modules\Core\Support\SuperAdmin;
 use Modules\Patient\Models\Patient;
 
 class PatientSearchService implements ProvidesFilamentPatientSearch
 {
+    /**
+     * Plain columns matched with LIKE. Phone, email and identifier values are
+     * encrypted at rest and are matched exactly through their blind indexes
+     * instead (see applyBlindIndexSearch()).
+     *
+     * @var array<int, string>
+     */
     protected array $searchableFields = [
         'mrn',
         'old_hospital_number',
         'first_name',
         'middle_name',
         'last_name',
-        'phone',
-        'email',
         'global_uuid',
     ];
 
+    /** @var array<int, string> */
     protected array $relationSearchableFields = [
-        'identifiers.value',
         'identifiers.type',
-        'emergencyContacts.phone',
         'emergencyContacts.name',
         'insurancePolicies.member_number',
     ];
@@ -94,12 +99,32 @@ class PatientSearchService implements ProvidesFilamentPatientSearch
         return $query->get();
     }
 
+    /**
+     * Exact match on the (encrypted) phone number in any common spelling.
+     */
     public function searchByPhone(string $phone): Collection
     {
-        $normalizedPhone = $this->normalizePhone($phone);
+        if (BlindIndex::phone($phone) === null) {
+            return new Collection;
+        }
 
         return Patient::query()
-            ->whereRaw("REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?", ["%{$normalizedPhone}%"])
+            ->whereBlindIndex('phone', $phone)
+            ->with(['branch'])
+            ->get();
+    }
+
+    /**
+     * Exact, case-insensitive match on the (encrypted) email address.
+     */
+    public function searchByEmail(string $email): Collection
+    {
+        if (BlindIndex::email($email) === null) {
+            return new Collection;
+        }
+
+        return Patient::query()
+            ->whereBlindIndex('email', $email)
             ->with(['branch'])
             ->get();
     }
@@ -219,6 +244,54 @@ class PatientSearchService implements ProvidesFilamentPatientSearch
                 }
             });
         }
+
+        $this->applyBlindIndexSearch($query, $term);
+    }
+
+    /**
+     * Encrypted contact details cannot be LIKE-matched; compare the term's
+     * blind index with the patient's, the emergency contacts' and the
+     * identifiers' stored hashes instead.
+     */
+    protected function applyBlindIndexSearch(Builder $query, string $term): void
+    {
+        if ($this->looksLikeEmail($term)) {
+            $hash = BlindIndex::email($term);
+
+            $query->orWhere('patients.email_index', $hash)
+                ->orWhereHas('emergencyContacts', fn (Builder $contacts) => $contacts->where('email_index', $hash));
+
+            return;
+        }
+
+        if ($this->looksLikePhone($term)) {
+            $hash = BlindIndex::phone($term);
+
+            $query->orWhere('patients.phone_index', $hash)
+                ->orWhereHas('emergencyContacts', fn (Builder $contacts) => $contacts
+                    ->where('phone_index', $hash)
+                    ->orWhere('alternate_phone_index', $hash));
+        }
+
+        $identifierHash = BlindIndex::identifier($term);
+
+        if ($identifierHash !== null) {
+            $query->orWhereHas('identifiers', fn (Builder $identifiers) => $identifiers->where('value_index', $identifierHash));
+        }
+    }
+
+    public function looksLikeEmail(string $term): bool
+    {
+        return filter_var(trim($term), FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * At least seven digits once separators and a leading plus are removed.
+     */
+    public function looksLikePhone(string $term): bool
+    {
+        return (bool) preg_match('/^\+?[\d\s\-().]{7,}$/', trim($term))
+            && strlen($this->normalizePhone($term)) >= 7;
     }
 
     public function normalizeTerm(string $term): string
