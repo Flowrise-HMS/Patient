@@ -20,18 +20,21 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Modules\Billing\Services\PatientBalanceQueryService;
 use Modules\Clinical\Classes\Actions\PatientActions;
 use Modules\Core\Classes\Support\TableBulkActionsRegistry;
 use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Core\Filament\Tables\Columns\CurrencyColumn;
+use Modules\Core\Settings\FeatureSettings;
 use Modules\Core\Support\OptionalClass;
 use Modules\Core\Support\SuperAdmin;
 use Modules\Insurance\Services\MemberVerificationService;
 use Modules\Patient\Classes\Services\PatientSearchService;
 use Modules\Patient\Enums\Gender;
 use Modules\Patient\Filament\Clusters\Patient\Resources\Patients\PatientResource;
+use Modules\Patient\Http\Controllers\HospitalCardsBulkController;
 use Ysfkaya\FilamentPhoneInput\Tables\PhoneColumn;
 
 class PatientsTable
@@ -305,6 +308,23 @@ class PatientsTable
                  * available".
                  */
                 ...app(TableBulkActionsRegistry::class)->for(static::class),
+                Action::make('print_hospital_cards')
+                    ->label(__('Print hospital cards'))
+                    ->icon('heroicon-o-identification')
+                    ->color('gray')
+                    ->accessSelectedRecords()
+                    ->visible(fn (): bool => app(FeatureSettings::class)->patient_hospital_card_enabled
+                        && (bool) Auth::user()?->can('print_hospital_card'))
+                    ->modalHeading(__('Print hospital cards'))
+                    ->modalContent(fn (Collection $records) => view('core::filament.bulk-print-link', [
+                        'count' => $records->count(),
+                        'max' => HospitalCardsBulkController::MAX_CARDS,
+                        'url' => $records->count() <= HospitalCardsBulkController::MAX_CARDS
+                            ? HospitalCardsBulkController::urlFor($records->modelKeys())
+                            : null,
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(__('Close')),
                 Action::make('activate_selected')
                     ->label('Activate Selected')
                     ->icon('heroicon-o-user-plus')
