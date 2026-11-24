@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Context;
 use Modules\Core\Models\Branch;
 use Modules\Core\Models\Organization;
 use Modules\Patient\Models\Patient;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 /**
@@ -47,6 +48,10 @@ class FhirPatientImportTest extends TestCase
         ]);
 
         $this->user = User::factory()->create(['branch_id' => $this->branch->id]);
+
+        foreach (['Create Patient', 'Update Patient'] as $permission) {
+            $this->user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+        }
 
         Context::add('current_branch_id', $this->branch->id);
     }
