@@ -59,8 +59,8 @@ Exact screens and click paths are described for staff in the [User guide: Patien
 | `app/Policies/` | Fine-grained access (who may create, view or merge a patient). |
 | `app/Events/`, `app/Observers/` | `PatientRegistered/Updated/Deactivated/Deceased/PatientsMerged` events; observer that generates the MRN. |
 | `app/Console/` | `patients:rebuild-search-indexes` (recomputes the phone/email/identifier blind indexes). |
-| `app/Http/` | Hospital card PDF route, `GET /api/v1/patients` REST controller, FHIR `PatientTransformer`. |
-| `database/migrations/` | 13 migrations for patient-related tables. |
+| `app/Http/` | Hospital card PDF route, `/api/v1/patients` REST CRUD controller (token scope `patients`), FHIR `PatientTransformer`. |
+| `database/migrations/` | 16 migrations for patient-related tables. |
 
 ## Dependencies
 
@@ -80,4 +80,4 @@ Rollout status for all modules: [Module status](../../docs/shared/module-status.
 - **Prefer services over ad hoc `Model::create()`** in new code so rules stay consistent with existing patterns.
 - **Custom permissions:** `print_hospital_card`, `discharge_patient`, `view_patient_balance`, `import_patients`, `merge_patients`.
 - **Extension points:** other modules add tabs with `RelationManagersRegistry`, header/bulk actions with `PageHeaderActionsRegistry` / `TableBulkActionsRegistry`, and merge handlers with `PatientMergeHandlersRegistry` (all in Core).
-- **Tests:** `php artisan test --compact Modules/Patient/tests` (25 test files).
+- **Tests:** `php artisan test --compact Modules/Patient/tests` (31 test files).
