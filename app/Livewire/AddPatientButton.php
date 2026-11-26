@@ -37,6 +37,8 @@ class AddPatientButton extends Component implements HasActions, HasSchemas
             ->model(Patient::class)
             ->color('info')
             ->slideOver()
+            // Icon only on phones, where the label wrapped to two lines in the top bar.
+            ->labeledFrom('md')
             ->tooltip(__('Add Patient'))
             ->modalHeading('Quick Patient Registration')
             ->modalDescription('Fast registration for emergency cases')
