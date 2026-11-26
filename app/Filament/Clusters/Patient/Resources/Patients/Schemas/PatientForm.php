@@ -254,7 +254,7 @@ class PatientForm
                 Select::make('address.country')
                     ->label('Country')
                     ->default(config('core.default_country_code', 'GH'))
-                    ->options(Country::pluck('name', 'iso2')?->toArray() ?? [])
+                    ->options(fn (): array => Country::pluck('name', 'iso2')?->toArray() ?? [])
                     ->searchable()
                     ->columnSpanFull(),
             ]);
@@ -290,7 +290,7 @@ class PatientForm
                 Select::make('nationality')
                     ->label('Nationality')
                     ->default(config('core.default_country_code', 'GH'))
-                    ->options(Country::pluck('name', 'iso2')?->toArray() ?? [])
+                    ->options(fn (): array => Country::pluck('name', 'iso2')?->toArray() ?? [])
                     ->live()
                     ->preload()
                     ->searchable(),
@@ -401,7 +401,7 @@ class PatientForm
                     Select::make('issuer_country')
                         ->label('Issuing Country')
                         ->default(config('core.default_country_code', 'GH'))
-                        ->options(Country::pluck('name', 'iso2')?->toArray() ?? [])
+                        ->options(fn (): array => Country::pluck('name', 'iso2')?->toArray() ?? [])
                         ->preload()
                         ->searchable(),
 
