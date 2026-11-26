@@ -128,6 +128,7 @@ class PatientAnalyticsService
                     ->join('patients', 'patients.id', '=', 'encounter_diagnoses.patient_id')
                     ->leftJoin('diagnosis_codes', 'diagnosis_codes.id', '=', 'encounter_diagnoses.diagnosis_code_id')
                     ->when($branchId, fn ($query) => $query->where('patients.branch_id', $branchId))
+                    ->where('encounter_diagnoses.is_active', true)
                     ->where('encounter_diagnoses.created_at', '>=', now()->subDays($days))
                     ->selectRaw("{$labelExpression} as diagnosis_label");
 
